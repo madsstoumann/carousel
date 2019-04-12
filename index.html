@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+<head>
+  <title>Carousel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link href="carousel.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="c-carousel" role="region" aria-label="Timeline" data-js="carousel">
+    <nav class="c-carousel__inner">
+      <ul class="c-carousel__list c-carousel__list--panorama" itemscope itemtype="http://schema.org/ItemList">
+        <!-- SINGLE LIST-ITEM-->
+        <li class="c-carousel__item" itemprop="itemListElem ent" itemscope itemtype="http://schema.org/ListItem">
+          <figure class="c-carousel__item-content">
+            <img src="images/01.jpeg" alt="Image 1" class="c-carousel__item-image" loading="eager" />
+            <span class="c-carousel__item-heading" itemprop="name">1945</span>
+            <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
+          </figure>
+          <a href="#1" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 1</a>
+        </li>
+        <!-- END SINGLE LIST-ITEM-->
+
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <figure class="c-carousel__item-content">
+            <img src="images/02.jpeg" alt="Image 2" class="c-carousel__item-image" loading="lazy" />
+            <span class="c-carousel__item-heading" itemprop="name">1954</span>
+            <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
+          </figure>
+          <a href="#2" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 2</a>
+        </li>
+
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <figure class="c-carousel__item-content">
+            <img src="images/03.jpeg" alt="Image 3" class="c-carousel__item-image" loading="lazy" />
+            <span class="c-carousel__item-heading" itemprop="name">1963</span>
+            <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
+          </figure>
+          <a href="#3" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 3</a>
+        </li>
+
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <figure class="c-carousel__item-content">
+            <img src="images/04.jpeg" alt="Image 4" class="c-carousel__item-image" loading="lazy" />
+            <span class="c-carousel__item-heading" itemprop="name">1972</span>
+            <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
+          </figure>
+          <a href="#4" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 4</a>
+        </li>
+
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <figure class="c-carousel__item-content">
+            <img src="images/05.jpeg" alt="Image 5" class="c-carousel__item-image" loading="lazy" />
+            <span class="c-carousel__item-heading" itemprop="name">1984</span>
+            <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
+          </figure>
+          <a href="#5" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 5</a>
+        </li>
+
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <figure class="c-carousel__item-content">
+            <img src="images/06.jpeg" alt="Image 1" class="c-carousel__item-image" loading="lazy" />
+            <span class="c-carousel__item-heading" itemprop="name">1991</span>
+            <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
+          </figure>
+          <a href="#6" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 6</a>
+        </li>
+<!-- 
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <figure itemprop="associatedMedia" itemscope="itemscope" itemtype="http://schema.org/VideoObject" class="">
+            <meta itemprop="description">
+            <meta itemprop="name">
+            <meta itemprop="thumbnailUrl" content="https://example.comhttps://www.youtube.com/watch?v=9m_K2Yg7wGQ">
+            <meta itemprop="uploadDate">
+            <iframe src="https://www.youtube.com/embed/9m_K2Yg7wGQ" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen="allowfullscreen" class="c-carousel__item-video"></iframe>
+            <figcaption itemprop="caption description" class="imagegallery__caption"></figcaption>
+          </figure>
+        </li>
+
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+          <video src="/video/my-alcon-consumer-hero.mp4" poster="/media/my-alcon-consumer-hero.jpg" muted loop autoplay class="c-carousel__item-video"></video>
+        </li> -->
+
+      </ul>
+    </nav>
+  </div>
+
+  <script type="module">
+    const elements = document.querySelectorAll('[data-js*="carousel"]');
+    if (elements.length) {
+      import('/carousel.mjs')
+      .then(module => {
+        const jsClass = module.default;
+        elements.forEach(element => {
+          new jsClass(element, {
+            autoplay: false,
+            // clsNav: 'c-carousel__nav c-timeline__nav',
+            navInline: true
+          });
+        });
+      })
+    }
+  </script>
+</body>
+</html>
