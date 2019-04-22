@@ -8,7 +8,16 @@
 </head>
 <body>
 
-  <div class="c-carousel" role="region" aria-label="Timeline" data-js="carousel">
+  <div
+    aria-label="Timeline"
+    class="c-carousel"
+    data-autoplay-delay=":1500"
+    data-js="carousel"
+    data-label-next="Næste"
+    data-nav-inline=":true"
+    data-show-thumbnails=":true"
+    role="region">
+
     <nav class="c-carousel__inner">
       <ul class="c-carousel__list c-carousel__list--panorama" itemscope itemtype="http://schema.org/ItemList">
         <!-- SINGLE LIST-ITEM-->
@@ -93,11 +102,7 @@
       .then(module => {
         const jsClass = module.default;
         elements.forEach(element => {
-          new jsClass(element, {
-            autoplay: false,
-            // clsNav: 'c-carousel__nav c-timeline__nav',
-            navInline: true
-          });
+          new jsClass(element, element.dataset);
         });
       })
     }

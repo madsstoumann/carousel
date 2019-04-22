@@ -1,3 +1,17 @@
+:root {
+  --carousel-bp-s: 600;
+  --carousel-bp-m: 1000;
+  --carousel-bp-l: 1400;
+  --carousel-bp-xl: 1920;
+  --carousel-bp-xxl: 3840;
+
+  --carousel-bp-s-val: 2;
+  --carousel-bp-m-val: 3;
+  --carousel-bp-l-val: 4;
+  --carousel-bp-xl-val: 6;
+  --carousel-bp-xxl-val: 8;
+}
+
 .c-carousel__list {
   cursor: grab;
   display: flex;
@@ -29,7 +43,8 @@
   display: none;
 }
 
-.c-carousel__item-image, .c-carousel__item-video {
+.c-carousel__item-image,
+.c-carousel__item-video {
   object-fit: cover;
   width: 100%;
   position: absolute;
@@ -87,8 +102,7 @@
 .c-carousel__nav--play,
 .c-carousel__nav--prev,
 .c-carousel__thumb-next,
-.c-carousel__thumb-prev
-{
+.c-carousel__thumb-prev {
   background-color: rgba(255, 255, 255, 0.65);
   background-position: 50%;
   background-repeat: no-repeat;
@@ -101,7 +115,8 @@
   width: 5em;
 }
 
-.c-carousel__nav--next, .c-carousel__thumb-next {
+.c-carousel__nav--next,
+.c-carousel__thumb-next {
   background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 0l-1 1 7 7-7 7 1 1 8-8-8-8z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
   right: 0;
 }
@@ -122,7 +137,8 @@
   opacity: 1;
 }
 
-.c-carousel__nav--prev, .c-carousel__thumb-prev {
+.c-carousel__nav--prev,
+.c-carousel__thumb-prev {
   background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.5 16l1-1-7-7 7-7-1-1-8 8 8 8z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
   left: 0;
 }
@@ -197,7 +213,6 @@
   transform: translateX(-70%);
 }
 
-
 /* Thirds */
 .c-carousel__list--thirds {
   left: -33.333333%;
@@ -223,11 +238,18 @@
 
 .c-carousel__thumb-inner {
   display: flex;
+  transition: transform 0.2s ease-in-out;
 }
 
 .c-carousel__thumb-item {
+  border: 2px solid transparent;
+  box-sizing: border-box;
   flex: 0 0 calc(50% - 1em);
-  margin: 0 .5em;
+  margin: 0 0.5em;
+}
+
+.c-carousel__thumb-item--active {
+  border-color: tomato;
 }
 
 .c-carousel__thumb-outer {
@@ -238,4 +260,28 @@
   overflow: hidden;
   padding: 2em 4em;
   position: relative;
+}
+
+@media only screen and (min-width: 600px) {
+  .c-carousel__thumb-item {
+    flex: 0 0 calc(33.333333% - 1em);
+  }
+}
+
+@media only screen and (min-width: 1000px) {
+  .c-carousel__thumb-item {
+    flex: 0 0 calc(25% - 1em);
+  }
+}
+
+@media only screen and (min-width: 1400px) {
+  .c-carousel__thumb-item {
+    flex: 0 0 calc(16.666667% - 1em);
+  }
+}
+
+@media only screen and (min-width: 1920px) {
+  .c-carousel__thumb-item {
+    flex: 0 0 calc(12.5% - 1em);
+  }
 }

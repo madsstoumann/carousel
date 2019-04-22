@@ -1,7 +1,7 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.22
+ * @version 0.9.25
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -36,7 +36,7 @@ export default class Carousel {
         clsPlay: 'c-carousel__nav--play',
         clsPrev: 'c-carousel__nav--prev',
         clsReverse: 'c-carousel--reverse',
-        
+
         clsThumbnailImage: 'c-carousel__thumb-image',
         clsThumbnailInner: 'c-carousel__thumb-inner',
         clsThumbnailItem: 'c-carousel__thumb-item',
@@ -56,100 +56,78 @@ export default class Carousel {
         thumbnails: [],
         touchDistance: 100
       },
-      settings
+      this.stringToType(settings)
     );
 
     /* Create / Reference elements */
     this.wrapper = wrapper;
     this.carousel = this.wrapper.querySelector(`.${this.settings.clsCarousel}`);
     //`<ul class="${this.settings.clsCarousel}" itemscope itemtype="http://schema.org/ItemList">`;
-      //TODO: Create carousel if not exists: 
+    //TODO: Create carousel if not exists:
     this.carousel.classList.add(this.settings.clsAnimate);
-    
-    this.headings = wrapper.querySelectorAll(`.${this.settings.clsItemHeading}`);
+
+    this.headings = wrapper.querySelectorAll(
+      `.${this.settings.clsItemHeading}`
+    );
 
     // TODO: Create inner if not exists
-    this.inner= this.wrapper.querySelector(`.${this.settings.clsInner}`);
-
-    this.previous = this.h(
-      'button',
-      { class: this.settings.clsPrev, 'aria-label': this.settings.labelPrev, 'rel': 'next' }
-    );
-    this.inner.appendChild(this.previous);
-
-    this.play = this.h(
-      'button',
-      { class: this.settings.clsPlay, 'aria-label': this.settings.labelPlay }
-    );
-    this.inner.appendChild(this.play);
-
-    this.next = this.h(
-      'button',
-      { class: this.settings.clsNext, 'aria-label': this.settings.labelNext, 'rel': 'prev' }
-    );
-    this.inner.appendChild(this.next)
+    this.inner = this.wrapper.querySelector(`.${this.settings.clsInner}`);
 
     if (this.settings.slides.length) {
       const html = this.createSlides(this.settings.slides);
       // eslint-disable-next-line
       console.log(html);
-      
     }
 
     this.slides = Array.from(this.carousel.children);
 
-    /* Add thumbnails */
-    if (this.settings.showThumbnails) {
-      this.thumbnails = this.settings.thumbnails.length ? this.settings.thumbnails : this.slides.map(element => element.querySelector('img'));
-      this.createThumbnails();
-    }
+    /* Set state/values */
+    const docStyle = getComputedStyle(document.documentElement);
 
-    /* Set state */
     this.activeSlide = 0;
+    this.breakpoints = [
+      docStyle.getPropertyValue('--carousel-bp-s') - 0 || 600,
+      docStyle.getPropertyValue('--carousel-bp-m') - 0 || 1000,
+      docStyle.getPropertyValue('--carousel-bp-l') - 0 || 1400,
+      docStyle.getPropertyValue('--carousel-bp-xl') - 0 || 1920,
+      docStyle.getPropertyValue('--carousel-bp-xxl') - 0 || 3840
+    ];
     this.interval = '';
     this.isPlaying = this.settings.autoplay;
+    this.itemsPerPage = 4;
+    this.page = 1;
+    this.pageItems = [
+      docStyle.getPropertyValue('--carousel-bp-s-val') - 0 || 2,
+      docStyle.getPropertyValue('--carousel-bp-m-val') - 0 || 3,
+      docStyle.getPropertyValue('--carousel-bp-l-val') - 0 || 4,
+      docStyle.getPropertyValue('--carousel-bp-xl-val') - 0 || 6,
+      docStyle.getPropertyValue('--carousel-bp-xxl-val') - 0 || 8
+    ];
     this.previousSlide = 0;
     this.total = this.slides.length - 1;
+    this.totalPages = 1;
     this.touchPosition = 0;
 
-    /* Set live-region */
-    this.live = this.h(
-      'span',
-      { class: this.settings.clsLive, 'aria-atomic': true, 'aria-live': true }
-    );
-    this.wrapper.appendChild(this.live)
-
-    /* Add navigation */
-    this.navigationWrapper = this.h('div', {
-      class: this.settings.clsNavWrapper
+    /* Add matchMedia rules */
+    this.breakpoints = this.breakpoints.map((breakpoint, index) => {
+      const min = index > 0 ? this.breakpoints[index - 1] : 0;
+      return window.matchMedia(
+        `(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
+      );
     });
-
-    this.navigation = this.h(
-      'nav',
-      {
-        class: this.settings.clsNav,
-        itemscope: 'itemscope',
-        itemtype: 'http://schema.org/SiteNavigationElement'
-      }
+    this.breakpoints.forEach(breakpoint =>
+      breakpoint.addListener(this.updateItemsPerPage.bind(this))
     );
-    this.navigationWrapper.appendChild(this.navigation);
 
-    this.navigation.innerHTML = this.slides
-      .map(
-        (item, index) =>
-          `<div class="${this.settings.clsNavItem}"><button class="${
-            this.settings.clsNavButton
-          }" aria-label="${
-            this.headings[index] ? this.headings[index].innerText:''
-          }" data-slide="${index}" itemprop="name"></button></div>`
-      )
-      .join('');
+    /* Set live-region */
+    this.live = this.h('span', {
+      class: this.settings.clsLive,
+      'aria-atomic': true,
+      'aria-live': true
+    });
+    this.wrapper.appendChild(this.live);
 
-    if (this.settings.navInline) {
-      this.inner.appendChild(this.navigationWrapper);
-    } else {
-      this.wrapper.appendChild(this.navigationWrapper);
-    }
+    this.createNavigation();
 
     /* Add meta:position, add aria-hidden to non-active slides */
     this.slides.forEach((slide, index) => {
@@ -160,15 +138,6 @@ export default class Carousel {
     });
 
     /* Add eventListeners */
-    this.navigation.addEventListener('click', event => {
-      const slide = event.target.dataset.slide;
-      if (slide) {
-        this.gotoSlide(slide);
-      }
-    });
-    this.next.addEventListener('click', () => this.navSlide(true));
-    this.play.addEventListener('click', () => this.autoPlay(!this.isPlaying));
-    this.previous.addEventListener('click', () => this.navSlide(false));
     this.wrapper.addEventListener('keydown', event => this.handleKeys(event));
     this.wrapper.addEventListener(
       'touchmove',
@@ -183,22 +152,26 @@ export default class Carousel {
       { passive: true }
     );
 
-    /* Set initial state */
-    this.autoPlay(this.isPlaying);
-    this.setLiveRegion();
-    this.setNavigationDots();
-    this.setReference();
+    /* Add thumbnails */
+    if (this.settings.showThumbnails) {
+      this.thumbnails = this.settings.thumbnails.length
+        ? this.settings.thumbnails
+        : this.slides.map(element => element.querySelector('img'));
+      this.createThumbnails();
+      this.updateItemsPerPage();
+    }
 
-    // eslint-disable-next-line
-    console.log(this);
+    /* Init */
+    this.autoPlay(this.isPlaying);
+    this.gotoSlide(0);
   }
 
   /**
-  * @function addClassArray
-  * @param {Node} element
-  * @param (Array | String) array
-  * @description Adds an array of classes to an element (IE hack)
-  */
+   * @function addClassArray
+   * @param {Node} element
+   * @param (Array | String) array
+   * @description Adds an array of classes to an element (IE hack)
+   */
   addClassArray(element, array) {
     if (Array.isArray(array)) {
       array.forEach(className => element.classList.add(className));
@@ -208,10 +181,10 @@ export default class Carousel {
   }
 
   /**
-  * @function autoPlay
-  * @param {Boolean} run
-  * @description Starts/stops autoplay of slides
-  */
+   * @function autoPlay
+   * @param {Boolean} run
+   * @description Starts/stops autoplay of slides
+   */
   autoPlay(run) {
     this.isPlaying = run;
     this.play.setAttribute('aria-pressed', run);
@@ -226,54 +199,156 @@ export default class Carousel {
   }
 
   /**
-  * @function createSlides
-  * @description Create slides from json
-  */
+   * @function createNavigation
+   * @description Create navigation-elements: dots, next, play, prev
+   */
+  createNavigation() {
+    this.navigation = this.h('nav', {
+      class: this.settings.clsNav,
+      itemscope: 'itemscope',
+      itemtype: 'http://schema.org/SiteNavigationElement'
+    });
+    this.navigation.innerHTML = this.slides
+      .map(
+        (item, index) =>
+          `<div class="${this.settings.clsNavItem}"><button class="${
+            this.settings.clsNavButton
+          }" aria-label="${
+            this.headings[index] ? this.headings[index].innerText : ''
+          }" data-slide="${index}" itemprop="name"></button></div>`
+      )
+      .join('');
+    this.navigation.addEventListener('click', event => {
+      const slide = event.target.dataset.slide;
+      if (slide) {
+        this.gotoSlide(slide - 0);
+      }
+    });
+
+    this.navigationWrapper = this.h('div', {
+      class: this.settings.clsNavWrapper
+    });
+    this.navigationWrapper.appendChild(this.navigation);
+
+    if (this.settings.navInline) {
+      /* Output dots inline (default) */
+      this.inner.appendChild(this.navigationWrapper);
+    } else {
+      /* Output dots in main wrapper (timeline and other scenarios) */
+      this.wrapper.appendChild(this.navigationWrapper);
+    }
+
+    const previous = this.h('button', {
+      class: this.settings.clsPrev,
+      'aria-label': this.settings.labelPrev,
+      rel: 'next'
+    });
+    previous.addEventListener('click', () => this.navSlide(false));
+
+    this.play = this.h('button', {
+      class: this.settings.clsPlay,
+      'aria-label': this.settings.labelPlay
+    });
+    this.play.addEventListener('click', () => this.autoPlay(!this.isPlaying));
+
+    const next = this.h('button', {
+      class: this.settings.clsNext,
+      'aria-label': this.settings.labelNext,
+      rel: 'prev'
+    });
+    next.addEventListener('click', () => this.navSlide(true));
+
+    this.inner.appendChild(previous);
+    this.inner.appendChild(this.play);
+    this.inner.appendChild(next);
+  }
+
+  /**
+   * @function createSlides
+   * @description Create slides from json
+   */
   createSlides(json) {
-    return json.forEach((slide, index) => `
-    <li class="${this.settings.clsItem}" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-      <figure class="${this.settings.clsContent}" itemprop="associatedMedia" itemscope itemtype="${slide.type === 'video' ? 'http://schema.org/VideoObject' : 'http://schema.org/ImageObject'}">
-      ${slide.type === 'video' ? `
+    return json
+      .forEach(
+        (slide, index) => `
+    <li class="${
+      this.settings.clsItem
+    }" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+      <figure class="${
+        this.settings.clsContent
+      }" itemprop="associatedMedia" itemscope itemtype="${
+          slide.type === 'video'
+            ? 'http://schema.org/VideoObject'
+            : 'http://schema.org/ImageObject'
+        }">
+      ${
+        slide.type === 'video'
+          ? `
         <meta itemprop="description" content="${slide.description}">
         <meta itemprop="name" content="${slide.title}" />
         <meta itemprop="thumbnailUrl" content="${slide.thumbnail}" />
         <meta itemprop="uploadDate" content="${slide.uploadDate}" />
-        <video v-if="videoLocal(image.src)" class="imagegallery__video" tabindex="-1" controls><source src="${slide.src}" :type="videoType(image.src)"></video>
+        <video v-if="videoLocal(image.src)" class="imagegallery__video" tabindex="-1" controls><source src="${
+          slide.src
+        }" :type="videoType(image.src)"></video>
         <iframe v-else :src="image.src" class="imagegallery__iframe" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      `: `
-        <img src="${slide.src}" alt="${slide.title}" class="${this.settings.clsItemImage}" loading="${index === 0 ? 'eager':'lazy'}" />
-      `}
-        <span class="${this.settings.clsItemHeading}" itemprop="name">${slide.title}</span>
-        <figcaption class="${this.settings.clsItemText}" itemprop="description">${slide.description}</figcaption>
+      `
+          : `
+        <img src="${slide.src}" alt="${slide.title}" class="${
+              this.settings.clsItemImage
+            }" loading="${index === 0 ? 'eager' : 'lazy'}" />
+      `
+      }
+        <span class="${this.settings.clsItemHeading}" itemprop="name">${
+          slide.title
+        }</span>
+        <figcaption class="${
+          this.settings.clsItemText
+        }" itemprop="description">${slide.description}</figcaption>
       </figure>
-      <a href="${slide.url}" class="${this.settings.clsItemLink}" itemprop="url" tabindex="-1">${slide.link}</a>
+      <a href="${slide.url}" class="${
+          this.settings.clsItemLink
+        }" itemprop="url" tabindex="-1">${slide.link}</a>
     </li>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**
-  * @function createThumbnails
-  * @description Create thumbnails and thumbnail-navigation
-  */
+   * @function createThumbnails
+   * @description Create thumbnails and thumbnail-navigation
+   */
   createThumbnails() {
     this.thumbnailNext = this.h('button', {
       class: this.settings.clsThumbnailNext,
       'aria-label': this.settings.labelNext
     });
-    
+    this.thumbnailNext.addEventListener('click', () => {
+      this.gotoPage(true);
+    });
+
     this.thumbnailPrev = this.h('button', {
       class: this.settings.clsThumbnailPrev,
       'aria-label': this.settings.labelPrev
     });
-
-    const thumbnailInner = this.h('div', {
-      class: this.settings.clsThumbnailInner
+    this.thumbnailPrev.addEventListener('click', () => {
+      this.gotoPage(false);
     });
 
-    thumbnailInner.innerHTML = this.thumbnails.map((image, index) => `
-    <figure class="${this.settings.clsThumbnailItem}" data-slide="${index}">
-      <img src="${image.src}" alt="${image.alt}" class="${this.settings.clsThumbnailImage}" loading="lazy" />
-    </figure>`).join('')
+    this.thumbnailInner = this.h('div', {
+      class: this.settings.clsThumbnailInner
+    });
+    this.thumbnailInner.innerHTML = this.thumbnails
+      .map(
+        (image, index) => `
+    <figure class="${this.settings.clsThumbnailItem}">
+      <img src="${image.src}" alt="${image.alt}" class="${
+          this.settings.clsThumbnailImage
+        }" data-slide="${index}" loading="lazy" />
+    </figure>`
+      )
+      .join('');
 
     const thumbnailOuter = this.h('div', {
       class: this.settings.clsThumbnailOuter
@@ -283,11 +358,23 @@ export default class Carousel {
       class: this.settings.clsThumbnailWrapper
     });
 
-    // thumbnailOuter.appendChild(thumbnailInner);
+    thumbnailOuter.appendChild(this.thumbnailInner);
     thumbnailWrapper.appendChild(this.thumbnailPrev);
     thumbnailWrapper.appendChild(thumbnailOuter);
     thumbnailWrapper.appendChild(this.thumbnailNext);
     this.wrapper.appendChild(thumbnailWrapper);
+
+    this.thumbnails = this.thumbnailInner.querySelectorAll(
+      `.${this.settings.clsThumbnailItem}`
+    );
+
+    /* Add eventListeners */
+    this.thumbnailInner.addEventListener('click', event => {
+      const slide = event.target.dataset.slide;
+      if (slide) {
+        this.gotoSlide(slide - 0);
+      }
+    });
   }
 
   /**
@@ -317,19 +404,32 @@ export default class Carousel {
   }
 
   /**
+   * @function gotoPage
+   * @param {Boolean} [dirUp]
+   * @description Scroll to a specific "page" within timeline or thumbnails
+   */
+  gotoPage(dirUp) {
+    if (typeof dirUp !== 'undefined') {
+      const page = this.page + (dirUp ? 1 : -1);
+      this.page =
+        page > this.totalPages ? 1 : page < 1 ? this.totalPages : page;
+    }
+    this.thumbnailInner.style.transform = `translateZ(0) translateX(${-100 *
+      (this.page - 1)}%)`;
+  }
+
+  /**
    * @function gotoSlide
    * @param {Number} slideIndex
+   * @param {Boolean} dirUp
    * @description Go to specific slide
    */
-  gotoSlide(slideIndex = -1) {
+  gotoSlide(slideIndex = -1, dirUp) {
     /* Determine slide-direction: Only apply if NOT infinity: true */
-    //if (!this.settings.infinity) {
-      this.carousel.classList.toggle(
-        this.settings.clsReverse,
-        slideIndex < this.activeSlide
-      );
-    //}
-    
+    this.carousel.classList.toggle(
+      this.settings.clsReverse,
+      this.settings.infinity ? !dirUp : slideIndex < this.activeSlide
+    );
     this.previousSlide = this.activeSlide;
 
     if (slideIndex > -1) {
@@ -338,14 +438,21 @@ export default class Carousel {
 
     this.setReference();
     this.reorderSlides();
-    this.setNavigationDots();
+    this.setActiveDot();
     this.setLiveRegion();
+
+    this.page = Math.ceil((slideIndex + 1) / this.itemsPerPage);
+
+    if (this.settings.showThumbnails) {
+      this.setActiveThumbnail();
+      this.gotoPage();
+    }
 
     /* Animate: Remove class, add it again after 50ms */
     this.carousel.classList.remove(this.settings.clsAnimate);
     setTimeout(() => {
       this.carousel.classList.add(this.settings.clsAnimate);
-    }, 50);
+    }, 1000 / 16);
   }
 
   /**
@@ -421,13 +528,13 @@ export default class Carousel {
   }
 
   /**
-  * @function navSlide
-  * @param {Boolean} [dirUp] dirUp Direction: up (true) or down (false)
-  * @description Go to next or previous slide
-  */
+   * @function navSlide
+   * @param {Boolean} [dirUp] dirUp Direction: up (true) or down (false)
+   * @description Go to next or previous slide
+   */
   navSlide(dirUp = true) {
     let index = this.getIndex(this.activeSlide, this.total, dirUp);
-    this.gotoSlide(index);
+    this.gotoSlide(index, dirUp);
   }
 
   /**
@@ -450,19 +557,34 @@ export default class Carousel {
       } else {
         order = 0;
       }
-
       slide.style.order = order + 1;
     });
   }
 
   /**
-   * @function scrollToPage
-   * @description Scroll to a specific "page" within timeline or thumbnails
+   * @function setActiveDot
+   * @description Set active dot, remove active from previous
    */
-  scrollToPage(index, items, wrapper) {
-    const page = Math.ceil((index + 1) / items);
-    // const viewportWidth = Math.max(wrapper.offsetWidth || document.documentElement.clientWidth, window.innerWidth || 0);
-    wrapper.scrollLeft = (page - 1) * wrapper.offsetWidth;
+  setActiveDot() {
+    this.navigation.children[this.previousSlide].classList.remove(
+      this.settings.clsNavButtonActive
+    );
+    this.navigation.children[this.activeSlide].classList.add(
+      this.settings.clsNavButtonActive
+    );
+  }
+
+  /**
+   * @function setActiveThumbnail
+   * @description Set active dot, remove active from previous
+   */
+  setActiveThumbnail() {
+    this.thumbnails[this.previousSlide].classList.remove(
+      this.settings.clsThumbnailActive
+    );
+    this.thumbnails[this.activeSlide].classList.add(
+      this.settings.clsThumbnailActive
+    );
   }
 
   /**
@@ -474,24 +596,41 @@ export default class Carousel {
   }
 
   /**
-   * @function setNavigattionDots
-   * @description Set active dot, remove active from previous
-   */
-  setNavigationDots() {
-    this.navigation.children[this.previousSlide].classList.remove(
-      this.settings.clsNavButtonActive
-    );
-    this.navigation.children[this.activeSlide].classList.add(
-      this.settings.clsNavButtonActive
-    );
-  }
-
-  /**
    * @function setReference
    * @description Set reference slide (previous or last)
    */
   setReference(slide = this.activeSlide) {
     this.reference = slide - 1 < 0 ? this.total : slide - 1;
     this.slides[this.reference].style.order = 1;
+  }
+
+  /**
+   * @function stringToType
+   * @param {Object} obj
+   * @description Convert data-attribute value to type
+   */
+  stringToType(obj) {
+    const object = Object.assign({}, obj);
+    Object.keys(object).forEach(key => {
+      if (object[key].charAt(0) === ':') {
+        object[key] = JSON.parse(object[key].slice(1));
+      }
+    });
+    return object;
+  }
+
+  /**
+   * @function updateItemsPerPage
+   * @description Updates items per page on matchMedia
+   */
+  updateItemsPerPage() {
+    this.breakpoints.forEach((breakpoint, index) => {
+      if (breakpoint.matches) {
+        this.itemsPerPage = this.pageItems[index];
+      }
+    });
+    this.totalPages = Math.ceil(this.total / this.itemsPerPage);
+    this.page = Math.ceil((this.activeSlide + 1) / this.itemsPerPage);
+    this.gotoPage();
   }
 }
