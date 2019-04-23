@@ -21,24 +21,32 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 
 ## Settings
 
-| Setting         | Default value                 |
-| --------------- | ----------------------------: |
-| autoplay        | false*                        |
-| autoplayDelay   | 3000*                         |
-| breakpoints     | [600, 1000, 1400, 1920, 3840]*|
-| infinity        | true*                         |
-| json            | ''                            |
-| navInline       | true                          |
-| pageItems       | [2, 3, 4, 6, 8]               |
-| showThumbnails  | false                         |
-| slides          | [ ]                           |
-| thumbnails      | [ ]                           |
-| touchDistance   | 100                           |
-| url             | ''                            |
+| Setting             | Default value                 |
+| ------------------- | ----------------------------: |
+| **autoplay**        | false                         |
+| _Start a slideshow_
+| **autoplayDelay**   | 3000                          |
+| _Delay (in ms) between slides, when autoplaying_
+| **breakpoints**     | [600, 1000, 1400, 1920, 3840] |
+| _Array of breakpoints (see pageItems)_
+| **infinity**        | true                          |
+| _Show previous and next slide_
+| **navInline**       | true                          |
+| _Render navigation dots inline (true), or after_
+| **pageItems**       | [2, 3, 4, 6, 8]               |
+| _Number of thumbnails shown per breakpoint_
+| **showThumbnails**  | false                         |
+| **slides**          | [ ]                           |
+| **thumbnails**      | [ ]                           |
+| **touchDistance**   | 100                           |
+| **url**             | ''                            |
 
+If you're loading settings from `data-*` attributes, use a colon as prefix for all non-string values:
 
-*) Prefix with ":", ie. `data-breakpoints=":[600, 800, 1000, 1200, 3840]"`
-
+```html
+data-autoplay=":true"
+data-breakpoints=":[600, 800, 1000, 1200, 3840]"
+```
 
 ### CSS Classes
 

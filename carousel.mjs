@@ -14,7 +14,6 @@ export default class Carousel {
         autoplayDelay: 3000,
         breakpoints: [600, 1000, 1400, 1920, 3840],
         infinity: true,
-        json: '',
         navInline: true,
         pageItems: [2, 3, 4, 6, 8],
         showThumbnails: false,
@@ -82,7 +81,7 @@ export default class Carousel {
     this.headings =
       wrapper.querySelectorAll(`.${this.settings.clsItemHeading}`) || [];
 
-    /* Set carousel, create if not exist */
+    /* Set carousel, create if not exists */
     this.carousel = this.wrapper.querySelector(`.${this.settings.clsCarousel}`);
     if (!this.carousel) {
       this.carousel = this.h('ul', {
@@ -94,7 +93,7 @@ export default class Carousel {
     }
     this.carousel.classList.add(this.settings.clsAnimate);
 
-    /* Set inner, create if not exist */
+    /* Set inner, create if not exists */
     this.inner = this.wrapper.querySelector(`.${this.settings.clsInner}`);
     if (!this.inner) {
       this.inner = this.h('div', {
