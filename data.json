@@ -21,5 +21,13 @@
     "title": "1945",
     "type": "video",
     "video": "iframe"
+  },
+  {
+    "description": "Landscape",
+    "src": "/video/my-alcon-consumer-hero.mp4",
+    "thumbnail": "images/03.jpeg",
+    "title": "1945",
+    "type": "video",
+    "video": "local"
   }
 ]

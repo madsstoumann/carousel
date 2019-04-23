@@ -192,18 +192,20 @@ export default class Carousel {
       ${
         slide.type === 'video'
           ? `
-        <meta itemprop="description" content="${slide.description}">
-        <meta itemprop="name" content="${slide.title}" />
-        <meta itemprop="thumbnailUrl" content="${slide.thumbnail}" />
-        <meta itemprop="uploadDate" content="${slide.uploadDate}" />${
-              slide.video === 'local'
-                ? `<video class="TODO" tabindex="-1" controls src="${
-                    slide.src
-                  }"></video>`
-                : `<iframe src="${slide.src}" class="${
-                    this.settings.clsItemVideo
-                  }" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
-            }
+        ${
+          slide.video === 'local'
+            ? `<video class="${
+                this.settings.clsItemVideo
+              }" tabindex="-1" controls src="${slide.src}"></video>`
+            : `<meta itemprop="description" content="${slide.description}">
+                <meta itemprop="name" content="${slide.title}" />
+                <meta itemprop="thumbnailUrl" content="${slide.thumbnail}" />
+                <meta itemprop="uploadDate" content="${
+                  slide.uploadDate
+                }" /><iframe src="${slide.src}" class="${
+                this.settings.clsItemVideo
+              }" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+        }
       `
           : `
         <img src="${slide.src}" alt="${slide.title}" class="${
@@ -505,11 +507,13 @@ export default class Carousel {
         this.settings.slides = await (await fetch(this.settings.url)).json();
         this.carousel.innerHTML = this.createSlides(this.settings.slides);
         this.setSlides();
+        this.setThumbnails(this.settings.slides);
         this.initAfterSlides();
       })();
     } else if (this.settings.slides.length) {
       this.carousel.innerHTML = this.createSlides(this.settings.slides);
       this.setSlides();
+      this.setThumbnails(this.settings.slides);
       this.initAfterSlides();
     } else {
       this.setSlides();
@@ -649,7 +653,6 @@ export default class Carousel {
    * @function setSlides
    * @description Inits slides, set attributes etc.
    */
-
   setSlides() {
     this.slides = Array.from(this.carousel.children);
     /* Add meta:position, add aria-hidden to non-active slides */
@@ -658,6 +661,16 @@ export default class Carousel {
       if (index !== this.activeSlide) {
         slide.setAttribute('aria-hidden', true);
       }
+    });
+  }
+
+  /**
+   * @function setThumbnails
+   * @description Creates array of thumbnails from slides-json
+   */
+  setThumbnails(json) {
+    this.settings.thumbnails = json.map(item => {
+      return { src: item.thumbnail, alt: item.title };
     });
   }
 
