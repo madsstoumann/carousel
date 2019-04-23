@@ -1,7 +1,7 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.26
+ * @version 0.9.27
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -32,6 +32,7 @@ export default class Carousel {
         clsItemImage: 'c-carousel__item-image',
         clsItemLink: 'c-carousel__item-link',
         clsItemText: 'c-carousel__item-text',
+        clsItemVideo: 'c-carousel__item-video',
         clsLive: 'u-visually-hidden c-carousel__live',
         clsNav: 'c-carousel__nav',
         clsNavItem: 'c-carousel__nav-item',
@@ -62,113 +63,7 @@ export default class Carousel {
       this.stringToType(settings)
     );
 
-    /* Set wrapper, add eventListeners */
-    this.wrapper = wrapper;
-    this.wrapper.addEventListener('keydown', event => this.handleKeys(event));
-    this.wrapper.addEventListener(
-      'touchmove',
-      event => this.handleTouch(event, this.settings.touchDistance),
-      { passive: true }
-    );
-    this.wrapper.addEventListener(
-      'touchstart',
-      event => {
-        this.touchPosition = event.changedTouches[0].pageX;
-      },
-      { passive: true }
-    );
-
-    this.headings =
-      wrapper.querySelectorAll(`.${this.settings.clsItemHeading}`) || [];
-
-    /* Set carousel, create if not exists */
-    this.carousel = this.wrapper.querySelector(`.${this.settings.clsCarousel}`);
-    if (!this.carousel) {
-      this.carousel = this.h('ul', {
-        class: this.settings.clsCarousel,
-        itemscope: 'itemscope',
-        itemtype: 'http://schema.org/ItemList'
-      });
-      this.wrapper.appendChild(this.carousel);
-    }
-    this.carousel.classList.add(this.settings.clsAnimate);
-
-    /* Set inner, create if not exists */
-    this.inner = this.wrapper.querySelector(`.${this.settings.clsInner}`);
-    if (!this.inner) {
-      this.inner = this.h('div', {
-        class: this.settings.clsInner
-      });
-      this.carousel.appendChild(this.inner);
-    }
-
-    /* Create live-region */
-    this.live = this.h('span', {
-      class: this.settings.clsLive,
-      'aria-atomic': true,
-      'aria-live': true
-    });
-    this.wrapper.appendChild(this.live);
-
-    /* WIP Create slides */
-    if (this.settings.slides.length) {
-      const html = this.createSlides(this.settings.slides);
-      // eslint-disable-next-line
-      console.log(html);
-    }
-
-    this.slides = Array.from(this.carousel.children);
-    /* Add meta:position, add aria-hidden to non-active slides */
-    this.slides.forEach((slide, index) => {
-      this.h('meta', { itemprop: 'position', content: index + 1 }, slide);
-      if (index !== this.activeSlide) {
-        slide.setAttribute('aria-hidden', true);
-      }
-    });
-
-    /* Create navigation */
-    this.createNavigation();
-
-    /* Create thumbnails */
-    if (this.settings.showThumbnails) {
-      this.thumbnails = this.settings.thumbnails.length
-        ? this.settings.thumbnails
-        : this.slides.map(element => element.querySelector('img'));
-
-      if (this.thumbnails.length) {
-        this.breakpoints = this.settings.breakpoints.map(
-          (breakpoint, index) => {
-            const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
-            return window.matchMedia(
-              `(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
-            );
-          }
-        );
-        this.breakpoints.forEach(breakpoint =>
-          breakpoint.addListener(this.updateItemsPerPage.bind(this))
-        );
-        this.createThumbnails();
-        this.updateItemsPerPage();
-      }
-    }
-
-    /* Set state defaults */
-    this.activeSlide = 0;
-    this.interval = '';
-    this.isPlaying = this.settings.autoplay;
-    this.itemsPerPage = 4;
-    this.page = 1;
-    this.previousSlide = 0;
-    this.total = this.slides.length - 1;
-    this.totalPages = 1;
-    this.touchPosition = 0;
-
-    /* Init */
-    this.autoPlay(this.isPlaying);
-    this.gotoSlide(0, true, false);
-
-    // eslint-disable-next-line
-    console.dir(this);
+    this.init(wrapper);
   }
 
   /**
@@ -277,17 +172,18 @@ export default class Carousel {
 
   /**
    * @function createSlides
+   * @param {Array} json
    * @description Create slides from json
    */
   createSlides(json) {
     return json
-      .forEach(
+      .map(
         (slide, index) => `
     <li class="${
       this.settings.clsItem
     }" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
       <figure class="${
-        this.settings.clsContent
+        this.settings.clsItemContent
       }" itemprop="associatedMedia" itemscope itemtype="${
           slide.type === 'video'
             ? 'http://schema.org/VideoObject'
@@ -299,11 +195,15 @@ export default class Carousel {
         <meta itemprop="description" content="${slide.description}">
         <meta itemprop="name" content="${slide.title}" />
         <meta itemprop="thumbnailUrl" content="${slide.thumbnail}" />
-        <meta itemprop="uploadDate" content="${slide.uploadDate}" />
-        <video v-if="videoLocal(image.src)" class="imagegallery__video" tabindex="-1" controls><source src="${
-          slide.src
-        }" :type="videoType(image.src)"></video>
-        <iframe v-else :src="image.src" class="imagegallery__iframe" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <meta itemprop="uploadDate" content="${slide.uploadDate}" />${
+              slide.video === 'local'
+                ? `<video class="TODO" tabindex="-1" controls src="${
+                    slide.src
+                  }"></video>`
+                : `<iframe src="${slide.src}" class="${
+                    this.settings.clsItemVideo
+                  }" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+            }
       `
           : `
         <img src="${slide.src}" alt="${slide.title}" class="${
@@ -318,9 +218,13 @@ export default class Carousel {
           this.settings.clsItemText
         }" itemprop="description">${slide.description}</figcaption>
       </figure>
-      <a href="${slide.url}" class="${
-          this.settings.clsItemLink
-        }" itemprop="url" tabindex="-1">${slide.link}</a>
+      ${
+        slide.url
+          ? `<a href="${slide.url}" class="${
+              this.settings.clsItemLink
+            }" itemprop="url" tabindex="-1">${slide.title}</a>`
+          : ''
+      }
     </li>
     `
       )
@@ -543,6 +447,127 @@ export default class Carousel {
   }
 
   /**
+   * @function init
+   * @description Set initial elements, create slides
+   */
+  init(wrapper) {
+    /* Set wrapper, add eventListeners */
+    this.wrapper = wrapper;
+    this.wrapper.addEventListener('keydown', event => this.handleKeys(event));
+    this.wrapper.addEventListener(
+      'touchmove',
+      event => this.handleTouch(event, this.settings.touchDistance),
+      { passive: true }
+    );
+    this.wrapper.addEventListener(
+      'touchstart',
+      event => {
+        this.touchPosition = event.changedTouches[0].pageX;
+      },
+      { passive: true }
+    );
+
+    this.headings =
+      wrapper.querySelectorAll(`.${this.settings.clsItemHeading}`) || [];
+
+    /* Set inner, create if not exists */
+    this.inner = this.wrapper.querySelector(`.${this.settings.clsInner}`);
+    if (!this.inner) {
+      this.inner = this.h('div', {
+        class: this.settings.clsInner
+      });
+      this.wrapper.appendChild(this.inner);
+    }
+
+    /* Set carousel, create if not exists */
+    this.carousel = this.wrapper.querySelector(`.${this.settings.clsCarousel}`);
+    if (!this.carousel) {
+      this.carousel = this.h('ul', {
+        class: this.settings.clsCarousel,
+        itemscope: 'itemscope',
+        itemtype: 'http://schema.org/ItemList'
+      });
+      this.inner.appendChild(this.carousel);
+    }
+    this.carousel.classList.add(this.settings.clsAnimate);
+
+    /* Create live-region */
+    this.live = this.h('span', {
+      class: this.settings.clsLive,
+      'aria-atomic': true,
+      'aria-live': true
+    });
+    this.wrapper.appendChild(this.live);
+
+    /* Create / reference slides */
+    if (this.settings.url) {
+      (async () => {
+        this.settings.slides = await (await fetch(this.settings.url)).json();
+        this.carousel.innerHTML = this.createSlides(this.settings.slides);
+        this.setSlides();
+        this.initAfterSlides();
+      })();
+    } else if (this.settings.slides.length) {
+      this.carousel.innerHTML = this.createSlides(this.settings.slides);
+      this.setSlides();
+      this.initAfterSlides();
+    } else {
+      this.setSlides();
+      this.initAfterSlides();
+    }
+  }
+
+  /**
+   * @function initAfterSlides
+   * @description When slides have been referenced/created, set initial state, create navigation, thumbnails etc.
+   */
+  initAfterSlides() {
+    /* Create navigation */
+    this.createNavigation();
+
+    /* Create thumbnails */
+    if (this.settings.showThumbnails) {
+      this.thumbnails = this.settings.thumbnails.length
+        ? this.settings.thumbnails
+        : this.slides.map(element => element.querySelector('img'));
+
+      if (this.thumbnails.length) {
+        this.breakpoints = this.settings.breakpoints.map(
+          (breakpoint, index) => {
+            const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
+            return window.matchMedia(
+              `(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
+            );
+          }
+        );
+        this.breakpoints.forEach(breakpoint =>
+          breakpoint.addListener(this.updateItemsPerPage.bind(this))
+        );
+        this.createThumbnails();
+        this.updateItemsPerPage();
+      }
+    }
+
+    /* Set defaults */
+    this.activeSlide = 0;
+    this.interval = '';
+    this.isPlaying = this.settings.autoplay;
+    this.itemsPerPage = 4;
+    this.page = 1;
+    this.previousSlide = 0;
+    this.total = this.slides.length - 1;
+    this.totalPages = 1;
+    this.touchPosition = 0;
+
+    /* Init */
+    this.autoPlay(this.isPlaying);
+    this.gotoSlide(0, true, false);
+
+    // eslint-disable-next-line
+    console.dir(this);
+  }
+
+  /**
    * @function navSlide
    * @param {Boolean} [dirUp] dirUp Direction: up (true) or down (false)
    * @description Go to next or previous slide
@@ -618,6 +643,22 @@ export default class Carousel {
   setReference(slide = this.activeSlide) {
     this.reference = slide - 1 < 0 ? this.total : slide - 1;
     this.slides[this.reference].style.order = 1;
+  }
+
+  /**
+   * @function setSlides
+   * @description Inits slides, set attributes etc.
+   */
+
+  setSlides() {
+    this.slides = Array.from(this.carousel.children);
+    /* Add meta:position, add aria-hidden to non-active slides */
+    this.slides.forEach((slide, index) => {
+      this.h('meta', { itemprop: 'position', content: index + 1 }, slide);
+      if (index !== this.activeSlide) {
+        slide.setAttribute('aria-hidden', true);
+      }
+    });
   }
 
   /**

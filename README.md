@@ -24,9 +24,9 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 | Setting             | Default value                 |
 | :------------------ | ----------------------------: |
 | **autoplay**        | false                         |
-| _Start a slideshow_                                 |
+| _Start a slideshow_
 | **autoplayDelay**   | 3000                          |
-| _Delay (in ms) between slides, when autoplaying_    |
+| _Delay (in ms) between slides, when autoplaying_
 | **breakpoints**     | [600, 1000, 1400, 1920, 3840] |
 | _Array of breakpoints (see pageItems)_
 | **infinity**        | true                          |
@@ -36,10 +36,15 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 | **pageItems**       | [2, 3, 4, 6, 8]               |
 | _Number of thumbnails shown per breakpoint_
 | **showThumbnails**  | false                         |
+| _Show and generate thumbnails_
 | **slides**          | [ ]                           |
+| _JSON-array with slide-data (see example below)_
 | **thumbnails**      | [ ]                           |
+| _JSON-array with thumbnail-data_
 | **touchDistance**   | 100                           |
+| _Pixelss required to trigger a touch-event_
 | **url**             | ''                            |
+| _Url for fetching slides- and thumbnail-data_
 
 If you're loading settings from `data-*` attributes, use a colon as prefix for all non-string values:
 
@@ -51,7 +56,7 @@ data-breakpoints=":[600, 800, 1000, 1200, 3840]"
 ### CSS Classes
 
 | CSS Class           | Default value                         |
-| ------------------- | ------------------------------------- |
+| :------------------ | :------------------------------------ |
 | clsActive           | 'c-carousel__item--active'            |
 | clsAnimate          | 'c-carousel--animate'                 |
 | clsCarousel         | 'c-carousel__list'                    |
@@ -62,6 +67,7 @@ data-breakpoints=":[600, 800, 1000, 1200, 3840]"
 | clsItemImage        | 'c-carousel__item-image'              |
 | clsItemLink         | 'c-carousel__item-link'               |
 | clsItemText         | 'c-carousel__item-text'               |
+| clsItemVideo        | 'c-carousel__item-video'              |
 | clsLive             | 'u-visually-hidden c-carousel__live'  |
 | clsNav              | 'c-carousel__nav'                     |
 | clsNavItem          | 'c-carousel__nav-item'                |
@@ -87,7 +93,7 @@ data-breakpoints=":[600, 800, 1000, 1200, 3840]"
 ### Labels
 
 | Label     | Default value |
-| ----------| ------------- |
+| :---------| :------------ |
 | labelNext | 'Next'        |
 | labelPlay | 'Play/Pause'  |
 | labelPrev | 'Previous'    |
