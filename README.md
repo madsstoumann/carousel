@@ -24,9 +24,9 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 | Setting             | Default value                 |
 | :------------------ | ----------------------------: |
 | **autoplay**        | false                         |
-| _Start a slideshow_                                ||
+| _Start a slideshow_                                 |
 | **autoplayDelay**   | 3000                          |
-| _Delay (in ms) between slides, when autoplaying_   ||
+| _Delay (in ms) between slides, when autoplaying_    |
 | **breakpoints**     | [600, 1000, 1400, 1920, 3840] |
 | _Array of breakpoints (see pageItems)_
 | **infinity**        | true                          |
