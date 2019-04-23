@@ -23,10 +23,10 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 
 | Setting         | Default value                 |
 | --------------- | ----------------------------: |
-| autoplay        | false                         |
-| autoplayDelay   | 3000                          |
-| breakpoints     | [600, 1000, 1400, 1920, 3840] |
-| infinity        | true                          |
+| autoplay        | false*                        |
+| autoplayDelay   | 3000*                         |
+| breakpoints     | [600, 1000, 1400, 1920, 3840]*|
+| infinity        | true*                         |
 | json            | ''                            |
 | navInline       | true                          |
 | pageItems       | [2, 3, 4, 6, 8]               |
@@ -35,6 +35,10 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 | thumbnails      | [ ]                           |
 | touchDistance   | 100                           |
 | url             | ''                            |
+
+
+*) Prefix with ":", ie. `data-breakpoints=":[600, 800, 1000, 1200, 3840]"`
+
 
 ### CSS Classes
 

@@ -63,69 +63,8 @@ export default class Carousel {
       this.stringToType(settings)
     );
 
-    /* Create / Reference elements */
+    /* Set wrapper, add eventListeners */
     this.wrapper = wrapper;
-    this.carousel = this.wrapper.querySelector(`.${this.settings.clsCarousel}`);
-    //`<ul class="${this.settings.clsCarousel}" itemscope itemtype="http://schema.org/ItemList">`;
-    //TODO: Create carousel if not exists:
-    this.carousel.classList.add(this.settings.clsAnimate);
-
-    this.headings = wrapper.querySelectorAll(
-      `.${this.settings.clsItemHeading}`
-    );
-
-    // TODO: Create inner if not exists
-    this.inner = this.wrapper.querySelector(`.${this.settings.clsInner}`);
-
-    if (this.settings.slides.length) {
-      const html = this.createSlides(this.settings.slides);
-      // eslint-disable-next-line
-      console.log(html);
-    }
-
-    this.slides = Array.from(this.carousel.children);
-
-    /* Set state/values */
-    this.activeSlide = 0;
-    this.interval = '';
-    this.isPlaying = this.settings.autoplay;
-    this.itemsPerPage = 4;
-    this.page = 1;
-    this.previousSlide = 0;
-    this.total = this.slides.length - 1;
-    this.totalPages = 1;
-    this.touchPosition = 0;
-
-    /* Add matchMedia rules */
-    this.breakpoints = this.settings.breakpoints.map((breakpoint, index) => {
-      const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
-      return window.matchMedia(
-        `(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
-      );
-    });
-    this.breakpoints.forEach(breakpoint =>
-      breakpoint.addListener(this.updateItemsPerPage.bind(this))
-    );
-
-    /* Set live-region */
-    this.live = this.h('span', {
-      class: this.settings.clsLive,
-      'aria-atomic': true,
-      'aria-live': true
-    });
-    this.wrapper.appendChild(this.live);
-
-    this.createNavigation();
-
-    /* Add meta:position, add aria-hidden to non-active slides */
-    this.slides.forEach((slide, index) => {
-      this.h('meta', { itemprop: 'position', content: index + 1 }, slide);
-      if (index !== this.activeSlide) {
-        slide.setAttribute('aria-hidden', true);
-      }
-    });
-
-    /* Add eventListeners */
     this.wrapper.addEventListener('keydown', event => this.handleKeys(event));
     this.wrapper.addEventListener(
       'touchmove',
@@ -140,18 +79,97 @@ export default class Carousel {
       { passive: true }
     );
 
-    /* Add thumbnails */
+    this.headings =
+      wrapper.querySelectorAll(`.${this.settings.clsItemHeading}`) || [];
+
+    /* Set carousel, create if not exist */
+    this.carousel = this.wrapper.querySelector(`.${this.settings.clsCarousel}`);
+    if (!this.carousel) {
+      this.carousel = this.h('ul', {
+        class: this.settings.clsCarousel,
+        itemscope: 'itemscope',
+        itemtype: 'http://schema.org/ItemList'
+      });
+      this.wrapper.appendChild(this.carousel);
+    }
+    this.carousel.classList.add(this.settings.clsAnimate);
+
+    /* Set inner, create if not exist */
+    this.inner = this.wrapper.querySelector(`.${this.settings.clsInner}`);
+    if (!this.inner) {
+      this.inner = this.h('div', {
+        class: this.settings.clsInner
+      });
+      this.carousel.appendChild(this.inner);
+    }
+
+    /* Create live-region */
+    this.live = this.h('span', {
+      class: this.settings.clsLive,
+      'aria-atomic': true,
+      'aria-live': true
+    });
+    this.wrapper.appendChild(this.live);
+
+    /* WIP Create slides */
+    if (this.settings.slides.length) {
+      const html = this.createSlides(this.settings.slides);
+      // eslint-disable-next-line
+      console.log(html);
+    }
+
+    this.slides = Array.from(this.carousel.children);
+    /* Add meta:position, add aria-hidden to non-active slides */
+    this.slides.forEach((slide, index) => {
+      this.h('meta', { itemprop: 'position', content: index + 1 }, slide);
+      if (index !== this.activeSlide) {
+        slide.setAttribute('aria-hidden', true);
+      }
+    });
+
+    /* Create navigation */
+    this.createNavigation();
+
+    /* Create thumbnails */
     if (this.settings.showThumbnails) {
       this.thumbnails = this.settings.thumbnails.length
         ? this.settings.thumbnails
         : this.slides.map(element => element.querySelector('img'));
-      this.createThumbnails();
-      this.updateItemsPerPage();
+
+      if (this.thumbnails.length) {
+        this.breakpoints = this.settings.breakpoints.map(
+          (breakpoint, index) => {
+            const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
+            return window.matchMedia(
+              `(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
+            );
+          }
+        );
+        this.breakpoints.forEach(breakpoint =>
+          breakpoint.addListener(this.updateItemsPerPage.bind(this))
+        );
+        this.createThumbnails();
+        this.updateItemsPerPage();
+      }
     }
+
+    /* Set state defaults */
+    this.activeSlide = 0;
+    this.interval = '';
+    this.isPlaying = this.settings.autoplay;
+    this.itemsPerPage = 4;
+    this.page = 1;
+    this.previousSlide = 0;
+    this.total = this.slides.length - 1;
+    this.totalPages = 1;
+    this.touchPosition = 0;
 
     /* Init */
     this.autoPlay(this.isPlaying);
-    this.gotoSlide(0);
+    this.gotoSlide(0, true, false);
+
+    // eslint-disable-next-line
+    console.dir(this);
   }
 
   /**
@@ -198,7 +216,7 @@ export default class Carousel {
     });
     this.navigation.innerHTML = this.slides
       .map(
-        (item, index) =>
+        (_item, index) =>
           `<div class="${this.settings.clsNavItem}"><button class="${
             this.settings.clsNavButton
           }" aria-label="${
@@ -246,9 +264,16 @@ export default class Carousel {
     });
     next.addEventListener('click', () => this.navSlide(true));
 
+    const zoom = this.h('button', {
+      class: this.settings.clsZoom,
+      'aria-label': this.settings.labelZoom
+    });
+    zoom.addEventListener('click', () => this.toggleZoom(true));
+
     this.inner.appendChild(previous);
     this.inner.appendChild(this.play);
     this.inner.appendChild(next);
+    this.inner.appendChild(zoom);
   }
 
   /**
@@ -609,6 +634,16 @@ export default class Carousel {
       }
     });
     return object;
+  }
+
+  /**
+   * @function toggleZoom
+   * @param {Boolean} [open]
+   * @description Zoom in / out (Open/close overlay)
+   */
+  toggleZoom(open = true) {
+    // eslint-disable-next-line
+    console.log(open);
   }
 
   /**
