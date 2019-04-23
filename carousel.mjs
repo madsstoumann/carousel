@@ -1,7 +1,7 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.25
+ * @version 0.9.26
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -12,19 +12,27 @@ export default class Carousel {
       {
         autoplay: false,
         autoplayDelay: 3000,
+        breakpoints: [600, 1000, 1400, 1920, 3840],
+        infinity: true,
+        json: '',
+        navInline: true,
+        pageItems: [2, 3, 4, 6, 8],
+        showThumbnails: false,
+        slides: [],
+        thumbnails: [],
+        touchDistance: 100,
+        url: '',
+
         clsActive: 'c-carousel__item--active',
         clsAnimate: 'c-carousel--animate',
         clsCarousel: 'c-carousel__list',
-
         clsInner: 'c-carousel__inner',
-
         clsItem: 'c-carousel__item',
         clsItemContent: 'c-carousel__item-content',
         clsItemHeading: 'c-carousel__item-heading',
         clsItemImage: 'c-carousel__item-image',
         clsItemLink: 'c-carousel__item-link',
         clsItemText: 'c-carousel__item-text',
-
         clsLive: 'u-visually-hidden c-carousel__live',
         clsNav: 'c-carousel__nav',
         clsNavItem: 'c-carousel__nav-item',
@@ -36,7 +44,6 @@ export default class Carousel {
         clsPlay: 'c-carousel__nav--play',
         clsPrev: 'c-carousel__nav--prev',
         clsReverse: 'c-carousel--reverse',
-
         clsThumbnailImage: 'c-carousel__thumb-image',
         clsThumbnailInner: 'c-carousel__thumb-inner',
         clsThumbnailItem: 'c-carousel__thumb-item',
@@ -46,15 +53,12 @@ export default class Carousel {
         clsThumbnailPrev: 'c-carousel__thumb-prev',
         clsThumbnailActive: 'c-carousel__thumb-item--active',
         clsThumbnailWrapper: 'c-carousel__thumb-wrapper',
-        infinity: true,
+        clsZoom: 'c-carousel__zoom',
+
         labelNext: 'Next',
         labelPlay: 'Play/Pause',
         labelPrev: 'Previous',
-        navInline: true,
-        showThumbnails: false,
-        slides: [],
-        thumbnails: [],
-        touchDistance: 100
+        labelZoom: 'Zoom in'
       },
       this.stringToType(settings)
     );
@@ -82,35 +86,19 @@ export default class Carousel {
     this.slides = Array.from(this.carousel.children);
 
     /* Set state/values */
-    const docStyle = getComputedStyle(document.documentElement);
-
     this.activeSlide = 0;
-    this.breakpoints = [
-      docStyle.getPropertyValue('--carousel-bp-s') - 0 || 600,
-      docStyle.getPropertyValue('--carousel-bp-m') - 0 || 1000,
-      docStyle.getPropertyValue('--carousel-bp-l') - 0 || 1400,
-      docStyle.getPropertyValue('--carousel-bp-xl') - 0 || 1920,
-      docStyle.getPropertyValue('--carousel-bp-xxl') - 0 || 3840
-    ];
     this.interval = '';
     this.isPlaying = this.settings.autoplay;
     this.itemsPerPage = 4;
     this.page = 1;
-    this.pageItems = [
-      docStyle.getPropertyValue('--carousel-bp-s-val') - 0 || 2,
-      docStyle.getPropertyValue('--carousel-bp-m-val') - 0 || 3,
-      docStyle.getPropertyValue('--carousel-bp-l-val') - 0 || 4,
-      docStyle.getPropertyValue('--carousel-bp-xl-val') - 0 || 6,
-      docStyle.getPropertyValue('--carousel-bp-xxl-val') - 0 || 8
-    ];
     this.previousSlide = 0;
     this.total = this.slides.length - 1;
     this.totalPages = 1;
     this.touchPosition = 0;
 
     /* Add matchMedia rules */
-    this.breakpoints = this.breakpoints.map((breakpoint, index) => {
-      const min = index > 0 ? this.breakpoints[index - 1] : 0;
+    this.breakpoints = this.settings.breakpoints.map((breakpoint, index) => {
+      const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
       return window.matchMedia(
         `(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
       );
@@ -421,10 +409,11 @@ export default class Carousel {
   /**
    * @function gotoSlide
    * @param {Number} slideIndex
-   * @param {Boolean} dirUp
+   * @param {Boolean} [dirUp]
+   * @param {Boolean} [animate]
    * @description Go to specific slide
    */
-  gotoSlide(slideIndex = -1, dirUp) {
+  gotoSlide(slideIndex = -1, dirUp, animate = true) {
     /* Determine slide-direction: Only apply if NOT infinity: true */
     this.carousel.classList.toggle(
       this.settings.clsReverse,
@@ -449,10 +438,12 @@ export default class Carousel {
     }
 
     /* Animate: Remove class, add it again after 50ms */
-    this.carousel.classList.remove(this.settings.clsAnimate);
-    setTimeout(() => {
-      this.carousel.classList.add(this.settings.clsAnimate);
-    }, 1000 / 16);
+    if (animate) {
+      this.carousel.classList.remove(this.settings.clsAnimate);
+      setTimeout(() => {
+        this.carousel.classList.add(this.settings.clsAnimate);
+      }, 1000 / 16);
+    }
   }
 
   /**
@@ -514,7 +505,7 @@ export default class Carousel {
    * @function handleTouch
    * @description Handles touch-move events
    * @param {Event} event
-   * @param {number} distance Distance to swipe before callback-function is invoked
+   * @param {Number} distance Distance to swipe before callback-function is invoked
    */
   handleTouch(event, distance) {
     const currentPosition = event.changedTouches[0].pageX;
@@ -597,6 +588,7 @@ export default class Carousel {
 
   /**
    * @function setReference
+   * @param {Number} [slide]
    * @description Set reference slide (previous or last)
    */
   setReference(slide = this.activeSlide) {
@@ -626,7 +618,7 @@ export default class Carousel {
   updateItemsPerPage() {
     this.breakpoints.forEach((breakpoint, index) => {
       if (breakpoint.matches) {
-        this.itemsPerPage = this.pageItems[index];
+        this.itemsPerPage = this.settings.pageItems[index];
       }
     });
     this.totalPages = Math.ceil(this.total / this.itemsPerPage);
