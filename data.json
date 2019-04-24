@@ -8,24 +8,20 @@
   },
   {
     "description": "Landscape",
-    "src": "images/02.jpeg",
-    "thumbnail": "images/02.jpeg",
+    "src": "https://player.vimeo.com/video/169982685",
     "title": "1954",
-    "type": "image",
-    "url": "#1"
+    "type": "video"
   },
   {
     "description": "Landscape",
     "src": "https://www.youtube.com/embed/9m_K2Yg7wGQ",
-    "thumbnail": "images/03.jpeg",
     "title": "1945",
     "type": "video",
-    "video": "iframe"
+    "video": "youtube"
   },
   {
     "description": "Landscape",
     "src": "/video/my-alcon-consumer-hero.mp4",
-    "thumbnail": "images/03.jpeg",
     "title": "1945",
     "type": "video",
     "video": "local"

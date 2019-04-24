@@ -1,27 +1,16 @@
-:root {
-  --carousel-bp-s: 600;
-  --carousel-bp-m: 1000;
-  --carousel-bp-l: 1400;
-  --carousel-bp-xl: 1920;
-  --carousel-bp-xxl: 3840;
-
-  --carousel-bp-s-val: 2;
-  --carousel-bp-m-val: 3;
-  --carousel-bp-l-val: 4;
-  --carousel-bp-xl-val: 6;
-  --carousel-bp-xxl-val: 8;
+/* TODO: ASPECT RATIO, 16:9, 1:1 */
+.c-carousel {
+  --carousel-thumbnail-active: tomato;
+  --carousel-thumbnail-gutter: 1em;
 }
 
-.c-carousel__list {
-  cursor: grab;
-  display: flex;
-  left: -100%;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  transform: translateX(100%);
-  will-change: transform;
+.c-carousel--animate {
+  transform: none !important;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.c-carousel--reverse {
+  transform: translateX(-100%);
 }
 
 .c-carousel__item {
@@ -71,6 +60,23 @@
 
 .c-carousel__item-text {
   display: none;
+}
+
+.c-carousel__inner {
+  overflow: hidden;
+  position: relative;
+}
+
+.c-carousel__list {
+  cursor: grab;
+  display: flex;
+  left: -100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  transform: translateX(100%);
+  will-change: transform;
 }
 
 .c-carousel__nav-dot {
@@ -143,18 +149,8 @@
   left: 0;
 }
 
-.c-carousel__inner {
-  overflow: hidden;
-  position: relative;
-}
-
-.c-carousel--animate {
-  transform: none !important;
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.c-carousel--reverse {
-  transform: translateX(-100%);
+.c-carousel__nav--zoom {
+  display: none;
 }
 
 .u-visually-hidden {
@@ -244,12 +240,12 @@
 .c-carousel__thumb-item {
   border: 2px solid transparent;
   box-sizing: border-box;
-  flex: 0 0 calc(50% - 1em);
-  margin: 0 0.5em;
+  flex: 0 0 calc(50% - var(--carousel-thumbnail-gutter));
+  margin: 0 calc(var(--carousel-thumbnail-gutter) / 2);
 }
 
 .c-carousel__thumb-item--active {
-  border-color: tomato;
+  border-color: var(--carousel-thumbnail-active);
 }
 
 .c-carousel__thumb-outer {
@@ -262,26 +258,27 @@
   position: relative;
 }
 
+/* RWD */
 @media only screen and (min-width: 600px) {
   .c-carousel__thumb-item {
-    flex: 0 0 calc(33.333333% - 1em);
+    flex: 0 0 calc(33.333333% - var(--carousel-thumbnail-gutter));
   }
 }
 
 @media only screen and (min-width: 1000px) {
   .c-carousel__thumb-item {
-    flex: 0 0 calc(25% - 1em);
+    flex: 0 0 calc(25% - var(--carousel-thumbnail-gutter));
   }
 }
 
 @media only screen and (min-width: 1400px) {
   .c-carousel__thumb-item {
-    flex: 0 0 calc(16.666667% - 1em);
+    flex: 0 0 calc(16.666667% - var(--carousel-thumbnail-gutter));
   }
 }
 
 @media only screen and (min-width: 1920px) {
   .c-carousel__thumb-item {
-    flex: 0 0 calc(12.5% - 1em);
+    flex: 0 0 calc(12.5% - var(--carousel-thumbnail-gutter));
   }
 }

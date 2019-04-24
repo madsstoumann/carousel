@@ -1,3 +1,5 @@
+import videoThumbnail from './videoThumbnail.js';
+
 /**
  * Carousel module.
  * @module carousel.mjs
@@ -53,7 +55,7 @@ export default class Carousel {
         clsThumbnailPrev: 'c-carousel__thumb-prev',
         clsThumbnailActive: 'c-carousel__thumb-item--active',
         clsThumbnailWrapper: 'c-carousel__thumb-wrapper',
-        clsZoom: 'c-carousel__zoom',
+        clsZoom: 'c-carousel__nav--zoom',
 
         labelNext: 'Next',
         labelPlay: 'Play/Pause',
@@ -204,7 +206,7 @@ export default class Carousel {
                   slide.uploadDate
                 }" /><iframe src="${slide.src}" class="${
                 this.settings.clsItemVideo
-              }" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+              }" frameborder="0" tabindex="-1" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
         }
       `
           : `
@@ -508,7 +510,7 @@ export default class Carousel {
         this.carousel.innerHTML = this.createSlides(this.settings.slides);
         this.setSlides();
         this.setThumbnails(this.settings.slides);
-        this.initAfterSlides();
+        //this.initAfterSlides();
       })();
     } else if (this.settings.slides.length) {
       this.carousel.innerHTML = this.createSlides(this.settings.slides);
@@ -669,9 +671,22 @@ export default class Carousel {
    * @description Creates array of thumbnails from slides-json
    */
   setThumbnails(json) {
-    this.settings.thumbnails = json.map(item => {
-      return { src: item.thumbnail, alt: item.title };
+    const promises = json.map(item => {
+      return item.type === 'video' && !item.thumbnail
+        ? videoThumbnail(item.src, item.title)
+        : { src: item.thumbnail, alt: item.title };
     });
+
+    // const promises = json.map(item => videoThumbnail(item.src));
+    Promise.all(promises).then(results => {
+      this.settings.thumbnails = results;
+      this.initAfterSlides();
+    });
+    // Promise.all(promises).then(function(results) {
+    //   // eslint-disable-next-line
+    //   console.log('hello');
+    // this.settings.thumbnails
+    // });
   }
 
   /**

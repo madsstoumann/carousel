@@ -30,7 +30,7 @@ Load a carousel for all elements with `data-js` containing `"carousel"`, ie. `da
 | **breakpoints**     | [600, 1000, 1400, 1920, 3840] |
 | _Array of breakpoints (see pageItems)_
 | **infinity**        | true                          |
-| _Show previous and next slide_
+| _Infinite navigation, otherwise rolls back to first_
 | **navInline**       | true                          |
 | _Render navigation dots inline (true), or after_
 | **pageItems**       | [2, 3, 4, 6, 8]               |
