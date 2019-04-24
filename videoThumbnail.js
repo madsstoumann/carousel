@@ -23,7 +23,7 @@ export default function videoThumbnail(src, title, noimage) {
     return json[0].thumbnail_medium || noimage;
   }
 
-  return new Promise(resolve => {
+  return new Promise(async resolve => {
     if (src.includes('mp4')) {
       const video = document.createElement('video');
       const canvas = document.createElement('canvas');
@@ -36,9 +36,8 @@ export default function videoThumbnail(src, title, noimage) {
       };
       video.src = src;
     } else if (src.includes('vimeo')) {
-      return vimeo(src.split('/').pop()).then(response => {
-        resolve({ src: response, alt: title });
-      });
+      const response_1 = await vimeo(src.split('/').pop());
+      resolve({ src: response_1, alt: title });
     } else if (src.includes('youtube')) {
       const videoID = src.match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();
       const videoSrc = videoID

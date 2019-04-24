@@ -3,7 +3,7 @@ import videoThumbnail from './videoThumbnail.js';
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.27
+ * @version 0.9.28
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -515,8 +515,8 @@ export default class Carousel {
     } else if (this.settings.slides.length) {
       this.carousel.innerHTML = this.createSlides(this.settings.slides);
       this.setSlides();
-      this.setThumbnails(this.settings.slides);
-      this.initAfterSlides();
+      //this.setThumbnails(this.settings.slides);
+      //this.initAfterSlides();
     } else {
       this.setSlides();
       this.initAfterSlides();
@@ -535,7 +535,9 @@ export default class Carousel {
     if (this.settings.showThumbnails) {
       this.thumbnails = this.settings.thumbnails.length
         ? this.settings.thumbnails
-        : this.slides.map(element => element.querySelector('img'));
+        : this.slides.map(element =>
+            element.querySelector('img')
+          ); /* TODO: Get thumbnail if markup contains <video> or <iframe> */
 
       if (this.thumbnails.length) {
         this.breakpoints = this.settings.breakpoints.map(
@@ -668,25 +670,19 @@ export default class Carousel {
 
   /**
    * @function setThumbnails
-   * @description Creates array of thumbnails from slides-json
+   * @description Creates array of thumbnails from slides-json, when init from url or json
    */
   setThumbnails(json) {
+    /* TODO: videoThumbnail should accept an object with alt: title etc. */
     const promises = json.map(item => {
       return item.type === 'video' && !item.thumbnail
         ? videoThumbnail(item.src, item.title)
         : { src: item.thumbnail, alt: item.title };
     });
-
-    // const promises = json.map(item => videoThumbnail(item.src));
     Promise.all(promises).then(results => {
       this.settings.thumbnails = results;
       this.initAfterSlides();
     });
-    // Promise.all(promises).then(function(results) {
-    //   // eslint-disable-next-line
-    //   console.log('hello');
-    // this.settings.thumbnails
-    // });
   }
 
   /**
@@ -710,6 +706,7 @@ export default class Carousel {
    * @description Zoom in / out (Open/close overlay)
    */
   toggleZoom(open = true) {
+    /* TODO */
     // eslint-disable-next-line
     console.log(open);
   }
