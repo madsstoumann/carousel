@@ -8,11 +8,11 @@
 </head>
 <body>
 
-  <div
+  <div hidden
     aria-label="Timeline"
     class="c-carousel"
     data-autoplay-delay=":1500"
-    data-js="carousel"
+    data-js="carouse"
     data-show-thumbnails=":true"
     role="region">
 
@@ -72,8 +72,8 @@
           </figure>
           <a href="#6" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 6</a>
         </li>
-
-        <!-- <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+<!-- 
+        <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
           <figure itemprop="associatedMedia" itemscope="itemscope" itemtype="http://schema.org/VideoObject" class="">
             <meta itemprop="description">
             <meta itemprop="name">
@@ -92,14 +92,14 @@
     </nav>
   </div>
 
-  <!-- <div
+  <div
     aria-label="Timeline"
     class="c-carousel"
     data-js="carousel"
     data-show-thumbnails=":true"
     data-url="data.json"
     role="region">
-  </div> -->
+  </div>
 
   <script type="module">
     const elements = document.querySelectorAll('[data-js*="carousel"]');

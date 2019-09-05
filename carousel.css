@@ -34,14 +34,14 @@
 
 .c-carousel__item-image,
 .c-carousel__item-video {
-  object-fit: cover;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
   bottom: 0;
-  right: 0;
   height: 100%;
+  left: 0;
+  object-fit: cover;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
 }
 
 .c-carousel__item-link {
@@ -104,6 +104,7 @@
   transform: translateX(-50%);
 }
 
+.c-carousel__nav--airplay,
 .c-carousel__nav--next,
 .c-carousel__nav--play,
 .c-carousel__nav--prev,
@@ -119,6 +120,13 @@
   top: 50%;
   transform: translateY(-50%);
   width: 5em;
+}
+
+.c-carousel__nav--airplay {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 3c1.078 0 2.016 0.938 2.016 2.016v12c0 1.078-0.938 1.969-2.016 1.969h-3.984v-1.969h3.984v-12h-18v12h3.984v1.969h-3.984c-1.078 0-2.016-0.891-2.016-1.969v-12c0-1.078 0.938-2.016 2.016-2.016h18zM6 21.984l6-6 6 6h-12z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
+  right: 0;
+  top: 0;
+  transform: translateY(0);
 }
 
 .c-carousel__nav--next,

@@ -4,6 +4,7 @@ import videoThumbnail from './videoThumbnail.js';
  * Carousel module.
  * @module carousel.mjs
  * @version 0.9.28
+ * @summary 24-07-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -66,6 +67,55 @@ export default class Carousel {
     );
 
     this.init(wrapper);
+  }
+
+  /**
+   * @function addAirplaySupport
+   * @description Adds support for Apple airplay
+   */
+  addAirplaySupport() {
+    //<button data-js="airPlayButton" hidden disabled>AirPlay</button>
+    if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      const videos = this.wrapper.querySelectorAll('video');
+      videos.forEach(video => {
+        const button = document.createElement('button');
+        button.classList.add('c-carousel__nav--airplay');
+        video.parentNode.insertBefore(button, video.nextSibling);
+        // eslint-disable-next-line
+        console.log(button);
+        video.addEventListener(
+          'webkitplaybacktargetavailabilitychanged',
+          function(event) {
+            switch (event.availability) {
+              case 'available':
+                button.hidden = false;
+                button.disabled = false;
+                break;
+              case 'not-available':
+                //button.hidden = true;
+                //button.disabled = true;
+                break;
+              default:
+                break;
+            }
+          }
+        );
+
+        video.addEventListener(
+          'webkitcurrentplaybacktargetiswirelesschanged',
+          function() {
+            //updateAirPlayButtonWirelessStyle();
+            //updatePageDimmerForWirelessPlayback();
+          }
+        );
+
+        if (window.WebKitPlaybackTargetAvailabilityEvent) {
+          button.addEventListener('click', function() {
+            video.webkitShowPlaybackTargetPicker();
+          });
+        }
+      });
+    }
   }
 
   /**
@@ -198,7 +248,9 @@ export default class Carousel {
           slide.video === 'local'
             ? `<video class="${
                 this.settings.clsItemVideo
-              }" tabindex="-1" controls src="${slide.src}"></video>`
+              }" tabindex="-1" controls ${slide.thumbnail ? `poster="${slide.thumbnail}"`:''} preload="metadata"><source src="${
+                slide.src
+              }" type="video/${slide.videoType || 'mp4'}"></source></video>`
             : `<meta itemprop="description" content="${slide.description}">
                 <meta itemprop="name" content="${slide.title}" />
                 <meta itemprop="thumbnailUrl" content="${slide.thumbnail}" />
@@ -553,6 +605,7 @@ export default class Carousel {
         );
         this.createThumbnails();
         this.updateItemsPerPage();
+        this.addAirplaySupport();
       }
     }
 

@@ -21,7 +21,7 @@
   },
   {
     "description": "Landscape",
-    "src": "/video/my-alcon-consumer-hero.mp4",
+    "src": "/video/my-alcon-consumer-hero.mp4#t=0.1",
     "title": "1945",
     "type": "video",
     "video": "local"
