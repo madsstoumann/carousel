@@ -1,0 +1,39 @@
+=====================================
+Properties, and their default values:
+=====================================
+
+autoplay: false
+autoplayDelay: 3000
+infinity: true
+labelAria: 'Description of carousel content'
+labelNext: 'Next'
+labelPlay: 'Play/Pause'
+labelPrev: 'Previous'
+preset: '' /* Optional extra styleclass */
+renderIndicatorsInline: true
+renderNavInline: true
+renderThumbnails: false
+
+=======
+Markup:
+=======
+
+<div aria-label="{{labelAria}}" class="c-carousel {{preset}}" data-js="carousel" role="region">
+  // OneBlocks or Images
+</div>
+
+Properties are added as data-attributes in kebab-case. 
+If they're not strings, prefix the value with ":":
+
+========
+Example:
+========
+<div 
+  aria-label="Timeline"
+  class="c-carousel"
+  data-autoplay-delay=":1500"
+  data-js="carousel"
+  data-render-thumbnails=":true"
+  role="region">
+
+  If possible, only add properties that differ from default.

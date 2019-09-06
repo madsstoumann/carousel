@@ -1,29 +1,29 @@
 [
-  {
-    "description": "Landscape",
-    "src": "images/01.jpeg",
-    "thumbnail": "images/01.jpeg",
-    "title": "1945",
-    "type": "image"
-  },
-  {
-    "description": "Landscape",
-    "src": "https://player.vimeo.com/video/169982685",
-    "title": "1954",
-    "type": "video"
-  },
-  {
-    "description": "Landscape",
-    "src": "https://www.youtube.com/embed/9m_K2Yg7wGQ",
-    "title": "1945",
-    "type": "video",
-    "video": "youtube"
-  },
-  {
-    "description": "Landscape",
-    "src": "/video/my-alcon-consumer-hero.mp4#t=0.1",
-    "title": "1945",
-    "type": "video",
-    "video": "local"
-  }
+	{
+		"description": "Landscape",
+		"src": "images/01.jpeg",
+		"thumbnail": "images/01.jpeg",
+		"title": "1945",
+		"type": "image"
+	},
+	{
+		"description": "Landscape",
+		"src": "https://player.vimeo.com/video/169982685",
+		"title": "1954",
+		"videoType": "video"
+	},
+	{
+		"description": "Landscape",
+		"src": "https://www.youtube.com/embed/9m_K2Yg7wGQ",
+		"title": "1945",
+		"type": "video",
+		"videoType": "2"
+	},
+	{
+		"description": "Landscape",
+		"src": "/video/my-alcon-consumer-hero.mp4#t=0.1",
+		"title": "1945",
+		"type": "video",
+		"videoType": "1"
+	}
 ]

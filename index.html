@@ -8,24 +8,27 @@
 </head>
 <body>
 
-  <div hidden
+  <div 
     aria-label="Timeline"
     class="c-carousel"
     data-autoplay-delay=":1500"
-    data-js="carouse"
-    data-show-thumbnails=":true"
+    data-js="carousel"
+    data-slides='[{"src":"images/01.jpeg"},{"src":"images/02.jpeg"},{"src":"images/03.jpeg"}]'
+    data-render-thumbnails=":true"
     role="region">
 
     <nav class="c-carousel__inner">
       <ul class="c-carousel__list c-carousel__list--panorama" itemscope itemtype="http://schema.org/ItemList">
 
         <li class="c-carousel__item" itemprop="itemListElem ent" itemscope itemtype="http://schema.org/ListItem">
+
           <figure class="c-carousel__item-content">
             <img src="images/01.jpeg" alt="Image 1" class="c-carousel__item-image" loading="eager" />
             <span class="c-carousel__item-heading" itemprop="name">1945</span>
             <figcaption class="c-carousel__item-text" itemprop="description">An elephant at sunset</figcaption>
           </figure>
           <a href="#1" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 1</a>
+          
         </li>
 
         <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
@@ -72,7 +75,93 @@
           </figure>
           <a href="#6" class="c-carousel__item-link" itemprop="url" tabindex="-1">Link 6</a>
         </li>
-<!-- 
+
+
+      </ul>
+    </nav>
+  </div>
+
+  <!-- <div
+    aria-label="Timeline"
+    class="c-carousel"
+    data-js="carousel"
+    data-show-thumbnails=":true"
+    data-url="data.json"
+    role="region">
+  </div> -->
+
+
+  <!-- <div
+  aria-label="OneBlock"
+  class="c-carousel"
+  data-js="carousel"
+  data-show-thumbnails=":false"
+  role="region">
+
+
+    <div class="c-ob -O-ly8" itemscope="" itemtype="http://schema.org/CreativeWork">
+      <figure class="c-ob__bg-wrapper" itemscope="" itemtype="http://schema.org/ImageObject">
+        <img title="undefined" class="c-ob__bg " itemprop="image" src="/demo/img/colo_hero.png" loading="lazy">
+      </figure>
+      <section class="c-ob__content">
+        <div class="c-ob__tagline">Ostomy Bags</div>
+        <h2 class="c-ob__headline" itemprop="headline">“SenSura® Mio Concave is a real life-changer”</h2>
+        <div class="c-ob__text" itemprop="description">
+          SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!
+        </div>
+  
+        <nav class="c-ob__meta">
+          <a class="c-ob__meta-item" href="https://www.facebook.com/sharer/sharer.php" target="_blank" rel="noopener noreferrer" itemprop="potentialAction" content="http://schema.org/ShareAction">
+          <svg class="c-ob__meta-icon"><use xlink:href="/demo/svg/icons.svg#icon-facebook"></use></svg>
+          <span class="c-ob__meta-text" itemprop="commentCount">Share on Facebook</span>
+          </a>
+        </nav>
+        <span class="c-ob__link-text">Read more</span>
+      </section>
+      <a class="c-ob__link" href="#sensura" itemprop="url">Read more</a>
+    </div>
+  
+    <div class="c-ob -O-ly8 -L-bg1 -M-ps2 -N-st6 -S-bg4 -S1-fn2 -S1-fz7 -S2-fz3 -S-ts5 -T-fz4 -E-bg1 -E-pd2 -T-lc5" itemscope="" itemtype="http://schema.org/CreativeWork">
+      <figure class="c-ob__bg-wrapper" itemscope="" itemtype="http://schema.org/VideoObject">
+        <meta itemprop="description" content="SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!<br /><br />SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!<br /><br />SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!">
+        <meta itemprop="name" content="“SenSura® Mio Concave is a real life-changer, and this is a very long headline, spanning multiple lines!”">
+        <meta itemprop="thumbnailUrl" content="/demo/img/colo_pic3.png">
+        <meta itemprop="uploadDate" content="undefined">
+        <iframe class="c-ob__bg" itemprop="video" src="https://www.youtube.com/embed/9m_K2Yg7wGQ" frameborder="0" tabindex="-1" allow="autoplay; encrypted-media" allowfullscreen="allowfullscreen" data-ob-group="bgmedia"></iframe>
+        <img title="undefined" class="c-ob__bg c-ob__bg-poster" itemprop="image" src="/demo/img/colo_pic3.png" loading="lazy" data-ob-group="bgmedia">
+        <div class="c-ob__bg-play"></div>
+      </figure>
+      <section class="c-ob__content">
+        <div class="c-ob__tagline" data-ob-group="tagline">Ostomy Bags</div>
+        <h2 class="c-ob__headline" itemprop="headline" data-ob-group="headline">“SenSura® Mio Concave is a real life-changer, and this is a very long headline, spanning multiple lines!”</h2>
+        <div class="c-ob__text" itemprop="description" data-ob-group="text">
+          SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!<br><br>SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!<br><br>SenSura Mio Convex, the adaptive convex with a unique FlexShell and three different options to provide a custom fit for every body!
+        </div>
+        <nav class="c-ob__meta" data-ob-group="meta">
+          <span class="c-ob__meta-item" href="https://www.facebook.com/sharer/sharer.php" target="_blank" rel="noopener noreferrer" itemprop="potentialAction" content="http://schema.org/ShareAction" data-ob-group="meta">
+            <svg class="c-ob__meta-icon"><use xlink:href="/demo/svg/icons.svg#icon-facebook"></use></svg>
+            <span class="c-ob__meta-text" itemprop="commentCount">Share on Facebook</span>
+          </span>
+        </nav>
+        <span class="c-ob__link-text" data-ob-group="link">Read more</span>
+      </section>		
+    </div>
+  </div>
+</div>  -->
+  <script type="module">
+    const elements = document.querySelectorAll('[data-js*="carousel"]');
+    if (elements.length) {
+      import('/carousel.mjs')
+      .then(module => {
+        const jsClass = module.default;
+        elements.forEach(element => {
+          new jsClass(element, element.dataset);
+        });
+      })
+    }
+  </script>
+
+  <!-- 
         <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
           <figure itemprop="associatedMedia" itemscope="itemscope" itemtype="http://schema.org/VideoObject" class="">
             <meta itemprop="description">
@@ -87,31 +176,5 @@
         <li class="c-carousel__item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
           <video src="/video/my-alcon-consumer-hero.mp4" poster="/media/my-alcon-consumer-hero.jpg" muted loop autoplay class="c-carousel__item-video"></video>
         </li>  -->
-
-      </ul>
-    </nav>
-  </div>
-
-  <div
-    aria-label="Timeline"
-    class="c-carousel"
-    data-js="carousel"
-    data-show-thumbnails=":true"
-    data-url="data.json"
-    role="region">
-  </div>
-
-  <script type="module">
-    const elements = document.querySelectorAll('[data-js*="carousel"]');
-    if (elements.length) {
-      import('/carousel.mjs')
-      .then(module => {
-        const jsClass = module.default;
-        elements.forEach(element => {
-          new jsClass(element, element.dataset);
-        });
-      })
-    }
-  </script>
 </body>
 </html>
