@@ -3,8 +3,8 @@ import videoThumbnail from './videoThumbnail.js';
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.30
- * @summary 06-09-2019
+ * @version 0.9.35
+ * @summary 12-09-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -13,13 +13,17 @@ export default class Carousel {
 	constructor(wrapper, settings) {
 		this.settings = Object.assign(
 			{
+				animateTimeout: 33,
+				arrowRight: 'M9.707 13.707l5-5c0.391-0.39 0.391-1.024 0-1.414l-5-5c-0.391-0.391-1.024-0.391-1.414 0s-0.391 1.024 0 1.414l3.293 3.293h-9.586c-0.552 0-1 0.448-1 1s0.448 1 1 1h9.586l-3.293 3.293c-0.195 0.195-0.293 0.451-0.293 0.707s0.098 0.512 0.293 0.707c0.391 0.391 1.024 0.391 1.414 0z',
+				arrowRightSize: 16,
 				autoplay: false,
 				autoplayDelay: 3000,
 				breakpoints: [600, 1000, 1400, 1920, 3840],
-				infinity: true,
-				renderIndicatorsInline: true,
+				renderIndicators: true,
+				renderNav: true,
 				renderNavInline: true,
 				renderThumbnails: false,
+				renderThumbnailsNav: true,
 				pageItems: [2, 3, 4, 6, 8],
 				slides: [],
 				thumbnails: [],
@@ -38,8 +42,8 @@ export default class Carousel {
 				clsItemVideo: 'c-carousel__item-video',
 				clsIndicator: 'c-carousel__indicator',
 				clsIndicatorItem: 'c-carousel__indicator-item',
-				clsIndicatorButton: 'c-carousel__indicator-dot',
-				clsIndicatorButtonActive: 'c-carousel__indicator-dot--active',
+				clsIndicatorButton: 'c-carousel__indicator-btn',
+				clsIndicatorButtonActive: 'c-carousel__indicator-btn--active',
 				clsIndicatorWrapper: 'c-carousel__indicator-wrapper',
 				clsLive: 'u-visually-hidden c-carousel__live',
 				clsNav: 'c-carousel__nav',
@@ -65,6 +69,7 @@ export default class Carousel {
 			this.stringToType(settings)
 		);
 		this.init(wrapper);
+		console.log(this)
 	}
 
 	/**
@@ -122,8 +127,10 @@ export default class Carousel {
 	 */
 	autoPlay(run) {
 		this.isPlaying = run;
-		this.play.setAttribute('aria-pressed', run);
-		this.play.classList.toggle(this.settings.clsPause, run);
+		if (this.play) {
+			this.play.setAttribute('aria-pressed', run);
+			this.play.classList.toggle(this.settings.clsNavPause, run);
+		}
 		if (run) {
 			this.interval = setInterval(() => {
 				this.navSlide(true);
@@ -138,51 +145,55 @@ export default class Carousel {
 	 * @description Create navigation-elements: indication, next, play, prev
 	 */
 	createNavigation() {
-		/* Create indicators */
-		this.indicators = this.h('nav', { class: this.settings.clsIndicator, itemscope: 'itemscope', itemtype: 'http://schema.org/SiteNavigationElement'});
-		this.indicators.innerHTML = this.slides.map((item, index) =>
-		`<div class="${this.settings.clsIndicatorItem}">
-			<button class="${this.settings.clsIndicatorButton}" aria-label="${this.headings[index] ? this.headings[index].innerText : ''}" data-slide="${index}" itemprop="name"></button>
-		</div>`).join('');
-
-		this.indicators.addEventListener('click', event => {
-			const slide = event.target.dataset.slide;
-			if (slide) {
-				this.gotoSlide(slide - 0);
-			}
-		});
-		this.indicatorsWrapper = this.h('div', {
-			class: this.settings.clsIndicatorWrapper
-		});
-		this.indicatorsWrapper.appendChild(this.indicators);
-
-		if (this.settings.renderIndicatorsInline) {
-			this.inner.appendChild(this.indicatorsWrapper);
-		} else {
-			this.wrapper.appendChild(this.indicatorsWrapper);
-		}
-
 		/* Create navigation: next, prev, play/pause */
-		const previous = this.h('button', { class: this.settings.clsNavPrev, 'aria-label': this.settings.labelPrev, rel: 'next' });
-		previous.addEventListener('click', () => this.navSlide(false));
+		if (this.settings.renderNav) {
+			
+			const previous = this.h('button', { class: this.settings.clsNavPrev, 'aria-label': this.settings.labelPrev, rel: 'next' });
+			previous.insertAdjacentHTML('afterbegin', this.navArrow(true));
+			previous.addEventListener('click', () => this.navSlide(false));
 
-		this.play = this.h('button', { class: this.settings.clsNavPlay, 'aria-label': this.settings.labelPlay });
-		this.play.addEventListener('click', () => this.autoPlay(!this.isPlaying));
+			this.play = this.h('button', { class: this.settings.clsNavPlay, 'aria-label': this.settings.labelPlay });
+			this.play.addEventListener('click', () => this.autoPlay(!this.isPlaying));
 
-		const next = this.h('button', {	class: this.settings.clsNavNext, 'aria-label': this.settings.labelNext, rel: 'prev' });
-		next.addEventListener('click', () => this.navSlide(true));
+			const next = this.h('button', {	class: this.settings.clsNavNext, 'aria-label': this.settings.labelNext, rel: 'prev' });
+			next.insertAdjacentHTML('afterbegin', this.navArrow(false));
+			next.addEventListener('click', () => this.navSlide(true));
 
-		if (this.settings.renderNavInline) {
-			this.inner.appendChild(previous);
-			this.inner.appendChild(this.play);
-			this.inner.appendChild(next);
+			if (this.settings.autoplay) {
+				this.inner.appendChild(this.play);
+			}
+
+			if (this.settings.renderNavInline) {
+				this.inner.appendChild(previous);
+				this.inner.appendChild(next);
+			}
+			else {
+				const navigation = this.h('nav', { class: this.settings.clsNav, itemscope: 'itemscope', itemtype: 'http://schema.org/SiteNavigationElement'});
+				navigation.appendChild(previous);
+				navigation.appendChild(next);
+				this.wrapper.appendChild(navigation)
+			}
 		}
-		else {
-			const navigation = this.h('nav', { class: this.settings.clsNav, itemscope: 'itemscope', itemtype: 'http://schema.org/SiteNavigationElement'});
-			navigation.appendChild(previous);
-			navigation.appendChild(this.play);
-			navigation.appendChild(next);
-			this.wrapper.appendChild(navigation)
+
+		/* Create indicators */
+		if (this.settings.renderIndicators) {
+			this.indicators = this.h('nav', { class: this.settings.clsIndicator, itemscope: 'itemscope', itemtype: 'http://schema.org/SiteNavigationElement'});
+			this.indicators.innerHTML = this.slides.map((item, index) =>
+			`<div class="${this.settings.clsIndicatorItem}">
+				<button class="${this.settings.clsIndicatorButton}" aria-label="${this.headings[index] ? this.headings[index].innerText : ''}" data-slide="${index}" itemprop="name"></button>
+			</div>`).join('');
+
+			this.indicators.addEventListener('click', event => {
+				const slide = event.target.dataset.slide;
+				if (slide) {
+					this.gotoSlide(slide - 0);
+				}
+			});
+			this.indicatorsWrapper = this.h('div', {
+				class: this.settings.clsIndicatorWrapper
+			});
+			this.indicatorsWrapper.appendChild(this.indicators);
+			this.wrapper.appendChild(this.indicatorsWrapper);
 		}
 	}
 
@@ -205,7 +216,6 @@ export default class Carousel {
 			${this.settings.clsItemHeading ? `<span class="${this.settings.clsItemHeading}" itemprop="name">${slide.title}</span>` : ''}
 			${this.settings.clsItemText ? `<figcaption class="${this.settings.clsItemText}" itemprop="description">${slide.description}</figcaption>` : ''}
 			</figure>
-			${slide.url	? `<a href="${slide.url}" class="${this.settings.clsItemLink}" itemprop="url" tabindex="-1">${slide.title}</a>` : ''}
 		</li>`).join('');
 	}
 
@@ -224,12 +234,15 @@ export default class Carousel {
 	 */
 	createThumbnails() {
 		this.thumbnailNext = this.h('button', { class: this.settings.clsThumbnailNext, 'aria-label': this.settings.labelNext });
+		this.thumbnailNext.insertAdjacentHTML('afterbegin', this.navArrow(false));
 		this.thumbnailNext.addEventListener('click', () => { this.gotoPage(true);	});
 
 		this.thumbnailPrev = this.h('button', { class: this.settings.clsThumbnailPrev, 'aria-label': this.settings.labelPrev });
+		this.thumbnailPrev.insertAdjacentHTML('afterbegin', this.navArrow(true));
 		this.thumbnailPrev.addEventListener('click', () => { this.gotoPage(false); });
 
 		this.thumbnailInner = this.h('div', { class: this.settings.clsThumbnailInner });
+
 		this.thumbnailInner.innerHTML = this.thumbnails.map((image, index) => `
 		<figure class="${this.settings.clsThumbnailItem}">
 			<img src="${image.src}" alt="${image.alt}" class="${this.settings.clsThumbnailImage}" data-slide="${index}" loading="lazy" />
@@ -239,9 +252,13 @@ export default class Carousel {
 		const thumbnailWrapper = this.h('nav', { class: this.settings.clsThumbnailWrapper	});
 
 		thumbnailOuter.appendChild(this.thumbnailInner);
-		thumbnailWrapper.appendChild(this.thumbnailPrev);
+		if (this.settings.renderThumbnailsNav) {
+			thumbnailWrapper.appendChild(this.thumbnailPrev);
+		}
 		thumbnailWrapper.appendChild(thumbnailOuter);
-		thumbnailWrapper.appendChild(this.thumbnailNext);
+		if (this.settings.renderThumbnailsNav) {
+			thumbnailWrapper.appendChild(this.thumbnailNext);
+		}
 		this.wrapper.appendChild(thumbnailWrapper);
 
 		this.thumbnails = this.thumbnailInner.querySelectorAll(`.${this.settings.clsThumbnailItem}`);
@@ -304,8 +321,7 @@ export default class Carousel {
 	gotoSlide(slideIndex = -1, dirUp, animate = true) {
 		/* Determine slide-direction: Only apply if NOT infinity: true */
 		this.carousel.classList.toggle(
-			this.settings.clsReverse,
-			this.settings.infinity ? !dirUp : slideIndex < this.activeSlide
+			this.settings.clsReverse, !dirUp
 		);
 		this.previousSlide = this.activeSlide;
 
@@ -315,7 +331,19 @@ export default class Carousel {
 
 		this.setReference();
 		this.reorderSlides();
-		this.setActiveDot();
+
+		/* Animate: Remove class, add it again after 50ms */
+		if (animate) {
+			this.carousel.classList.remove(this.settings.clsAnimate);
+			setTimeout(() => {
+				this.carousel.classList.add(this.settings.clsAnimate);
+			}, this.settings.animateTimeout);
+		}
+
+		if (this.settings.renderIndicators) {
+			this.setActiveIndicator();
+		}
+
 		this.setLiveRegion();
 
 		this.page = Math.ceil((slideIndex + 1) / this.itemsPerPage);
@@ -323,14 +351,6 @@ export default class Carousel {
 		if (this.settings.renderThumbnails) {
 			this.setActiveThumbnail();
 			this.gotoPage();
-		}
-
-		/* Animate: Remove class, add it again after 50ms */
-		if (animate) {
-			this.carousel.classList.remove(this.settings.clsAnimate);
-			setTimeout(() => {
-				this.carousel.classList.add(this.settings.clsAnimate);
-			}, 1000 / 16);
 		}
 	}
 
@@ -478,7 +498,8 @@ export default class Carousel {
 				: this.slides.map(element =>
 						element.querySelector('img')
 					); /* TODO: Get thumbnail if markup contains <video> or <iframe> */
-
+					/* TODO: Fallback-image for video if no thumbnail */
+	
 			/* Create match-media-listeners for breakpoint-changes */
 			if (this.thumbnails.length) {
 				this.breakpoints = this.settings.breakpoints.map((breakpoint, index) => {
@@ -498,10 +519,17 @@ export default class Carousel {
 		}
 
 		this.addAirplaySupport();
-
-		/* Init */
 		this.autoPlay(this.isPlaying);
 		this.gotoSlide(this.activeSlide, true, false);
+	}
+
+		/**
+	 * @function navArrow
+	 * @param {Boolean} [reverse] Flip
+	 * @description returns a right (or left) navigation arrow
+	 */
+	navArrow(reverse = false) {
+		return `<svg viewBox="0 0 ${this.settings.arrowRightSize} ${this.settings.arrowRightSize}"><path d="${this.settings.arrowRight}" ${reverse ? `transform="scale(-1, 1) translate(-${this.settings.arrowRightSize}, 0)"` : ''}></path></svg>`
 	}
 
 	/**
@@ -539,10 +567,10 @@ export default class Carousel {
 	}
 
 	/**
-	 * @function setActiveDot
+	 * @function setActiveIndicator
 	 * @description Set active dot, remove active from previous
 	 */
-	setActiveDot() {
+	setActiveIndicator() {
 		this.indicators.children[this.previousSlide].classList.remove(
 			this.settings.clsIndicatorButtonActive
 		);
