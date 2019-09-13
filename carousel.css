@@ -34,9 +34,6 @@
 	transform: none !important;
 	transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
-.c-carousel--reverse {
-	transform: translateX(-100%);
-}
 .c-carousel__item {
 	flex: 1 0 100%;
 	order: 2;
@@ -72,6 +69,9 @@
 	position: relative;
 	transform: translateX(100%);
 	will-change: transform;
+}
+.c-carousel__list.c-carousel--reverse {
+	transform: translateX(-100%);
 }
 
 /* Indicators */

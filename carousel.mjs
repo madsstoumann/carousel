@@ -1,21 +1,18 @@
-import videoThumbnail from './videoThumbnail.js';
-
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.35
- * @summary 12-09-2019
+ * @version 0.9.37
+ * @summary 13-09-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
-
 export default class Carousel {
 	constructor(wrapper, settings) {
 		this.settings = Object.assign(
 			{
 				animateTimeout: 33,
-				arrowRight: 'M9.707 13.707l5-5c0.391-0.39 0.391-1.024 0-1.414l-5-5c-0.391-0.391-1.024-0.391-1.414 0s-0.391 1.024 0 1.414l3.293 3.293h-9.586c-0.552 0-1 0.448-1 1s0.448 1 1 1h9.586l-3.293 3.293c-0.195 0.195-0.293 0.451-0.293 0.707s0.098 0.512 0.293 0.707c0.391 0.391 1.024 0.391 1.414 0z',
-				arrowRightSize: 16,
+				navNext: 'M9.707 13.707l5-5c0.391-0.39 0.391-1.024 0-1.414l-5-5c-0.391-0.391-1.024-0.391-1.414 0s-0.391 1.024 0 1.414l3.293 3.293h-9.586c-0.552 0-1 0.448-1 1s0.448 1 1 1h9.586l-3.293 3.293c-0.195 0.195-0.293 0.451-0.293 0.707s0.098 0.512 0.293 0.707c0.391 0.391 1.024 0.391 1.414 0z',
+				navNextSize: 16,
 				autoplay: false,
 				autoplayDelay: 3000,
 				breakpoints: [600, 1000, 1400, 1920, 3840],
@@ -69,7 +66,6 @@ export default class Carousel {
 			this.stringToType(settings)
 		);
 		this.init(wrapper);
-		console.log(this)
 	}
 
 	/**
@@ -147,7 +143,6 @@ export default class Carousel {
 	createNavigation() {
 		/* Create navigation: next, prev, play/pause */
 		if (this.settings.renderNav) {
-			
 			const previous = this.h('button', { class: this.settings.clsNavPrev, 'aria-label': this.settings.labelPrev, rel: 'next' });
 			previous.insertAdjacentHTML('afterbegin', this.navArrow(true));
 			previous.addEventListener('click', () => this.navSlide(false));
@@ -186,7 +181,8 @@ export default class Carousel {
 			this.indicators.addEventListener('click', event => {
 				const slide = event.target.dataset.slide;
 				if (slide) {
-					this.gotoSlide(slide - 0);
+					const index = parseInt(slide, 0);
+					this.gotoSlide(index, index > this.activeSlide);
 				}
 			});
 			this.indicatorsWrapper = this.h('div', {
@@ -319,7 +315,7 @@ export default class Carousel {
 	 * @description Go to specific slide
 	 */
 	gotoSlide(slideIndex = -1, dirUp, animate = true) {
-		/* Determine slide-direction: Only apply if NOT infinity: true */
+		/* Determine slide-direction */
 		this.carousel.classList.toggle(
 			this.settings.clsReverse, !dirUp
 		);
@@ -449,7 +445,6 @@ export default class Carousel {
 		this.wrapper.addEventListener('keydown', event => this.handleKeys(event));
 		this.wrapper.addEventListener('touchmove', event => this.handleTouch(event, this.settings.touchDistance), { passive: true });
 		this.wrapper.addEventListener('touchstart', event => { this.touchPosition = event.changedTouches[0].pageX; }, { passive: true });
-		/* TODO: Mouse Navigation? */
 
 		/* Get headings, if exists, otherwise set to empty array */
 		this.headings = wrapper.querySelectorAll(`.${this.settings.clsItemHeading}`) || [];
@@ -529,7 +524,7 @@ export default class Carousel {
 	 * @description returns a right (or left) navigation arrow
 	 */
 	navArrow(reverse = false) {
-		return `<svg viewBox="0 0 ${this.settings.arrowRightSize} ${this.settings.arrowRightSize}"><path d="${this.settings.arrowRight}" ${reverse ? `transform="scale(-1, 1) translate(-${this.settings.arrowRightSize}, 0)"` : ''}></path></svg>`
+		return `<svg viewBox="0 0 ${this.settings.navNextSize} ${this.settings.navNextSize}"><path d="${this.settings.navNext}" ${reverse ? `transform="scale(-1, 1) translate(-${this.settings.navNextSize}, 0)"` : ''}></path></svg>`
 	}
 
 	/**
@@ -632,15 +627,14 @@ export default class Carousel {
 	 */
 	setVideoThumbnails(json) {
 		/* TODO: videoThumbnail should accept an object with alt: title etc. */
-		const promises = json.map(item => {
-			return item.type === 'video' && !item.thumbnail
-				? videoThumbnail(item.src, item.title)
-				: { src: item.thumbnail, alt: item.title };
-		});
-		Promise.all(promises).then(results => {
-			this.settings.thumbnails = results;
-			
-		});
+		// const promises = json.map(item => {
+		// 	return item.type === 'video' && !item.thumbnail
+		// 		? videoThumbnail(item.src, item.title)
+		// 		: { src: item.thumbnail, alt: item.title };
+		// });
+		// Promise.all(promises).then(results => {
+		// 	this.settings.thumbnails = results;
+		// });
 	}
 
 	/**

@@ -98,3 +98,30 @@ data-breakpoints=":[600, 800, 1000, 1200, 3840]"
 | labelPlay | 'Play/Pause'  |
 | labelPrev | 'Previous'    |
 | labelZoom | 'Zoom in'     |
+
+## Mofifiers
+  c-carousel--indicator-lines // Show lines instead of dots
+  c-carousel--nav-below // Requires data-render-nav-inline=":true"
+  c-carousel--panorama 
+  c-carousel--thirds
+  c-carousel--timeline
+
+  Aspect Ratios
+  c-carousel--ar-1-1
+  c-carousel--ar-4-3
+  c-carousel--ar-16-9
+  c-carousel--ar-185-1
+  c-carousel--ar-239-1
+  c-carousel--ar-275-1
+  c-carousel--ar-3-2
+  c-carousel--ar-4-1
+
+  Aspect Ratios: Thumbnails
+  c-carousel--tar-1-1
+  c-carousel--tar-4-3
+  c-carousel--tar-16-9
+  c-carousel--tar-185-1
+  c-carousel--tar-239-1
+  c-carousel--tar-275-1
+  c-carousel--tar-3-2
+  c-carousel--tar-4-1

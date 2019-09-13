@@ -7,39 +7,10 @@
   <link href="carousel.css" rel="stylesheet">
 </head>
 <body>
-<!-- MODIFIERS: 
 
-  c-carousel--indicator-lines // Show lines instead of dots
-  c-carousel--nav-below // Requires data-render-nav-inline=":true"
-  c-carousel--panorama 
-  c-carousel--thirds
-  c-carousel--timeline
-
-  Aspect Ratios
-  c-carousel--ar-1-1
-  c-carousel--ar-4-3
-  c-carousel--ar-16-9
-  c-carousel--ar-185-1
-  c-carousel--ar-239-1
-  c-carousel--ar-275-1
-  c-carousel--ar-3-2
-  c-carousel--ar-4-1
-
-  Aspect Ratios: Thumbnails
-  c-carousel--tar-1-1
-  c-carousel--tar-4-3
-  c-carousel--tar-16-9
-  c-carousel--tar-185-1
-  c-carousel--tar-239-1
-  c-carousel--tar-275-1
-  c-carousel--tar-3-2
-  c-carousel--tar-4-1
-
-  Coloplast Example: c-carousel c-carousel--indicator-lines c-carousel--nav-below c-carousel--ar-3-2
--->
-
+  <!-- Examples with data from `data-slides`-attribute -->
   <div 
-    aria-label="Coloplast"
+    aria-label="Carousel with navigation below"
     class="c-carousel c-carousel--indicator-lines c-carousel--nav-below c-carousel--ar-3-2"
     data-js="carousel"
     data-slides='[{"src":"images/01.jpeg"},{"src":"images/02.jpeg"},{"src":"images/03.jpeg"},{"src":"images/04.jpeg"},{"src":"images/05.jpeg"},{"src":"images/06.jpeg"}]'
@@ -48,28 +19,42 @@
   </div>
 
   <div 
-    aria-label="Panorama"
+    aria-label="Carousel with Panorama-view, showing bits of previous and next slide"
     class="c-carousel c-carousel--panorama c-carousel--ar-3-2 c-carousel--tar-3-2"
+    data-nav-next="M5.5 0l-1 1 7 7-7 7 1 1 8-8-8-8z"
     data-js="carousel"
     data-slides='[{"src":"images/01.jpeg"},{"src":"images/02.jpeg"},{"src":"images/03.jpeg"},{"src":"images/04.jpeg"},{"src":"images/05.jpeg"},{"src":"images/06.jpeg"}]'
     data-render-nav-inline=":true"
     data-render-thumbnails=":true"
     role="region"
-    style="--carousel-nav-item-fill:#FFF;--carousel-nav-item-scale: 90%;--carousel-indicator-bg-active:indianred;--carousel-thumbnav-item-fill:#CCC;">
+    style="
+      --carousel-nav-item-bg:rgba(0,0,0,.6);
+      --carousel-nav-item-fill:#FFF;
+      --carousel-nav-item-scale: 90%;
+      --carousel-indicator-bg-active:indianred;
+      --carousel-thumbnav-item-bg:transparent;
+      --carousel-thumbnav-item-fill:#CCC;
+    ">
 </div>
 
   <div 
-    aria-label="Thirds"
+    aria-label="Carousel with three slides"
     class="c-carousel c-carousel--thirds c-carousel--ar-4-3"
     data-js="carousel"
     data-slides='[{"src":"images/01.jpeg"},{"src":"images/02.jpeg"},{"src":"images/03.jpeg"},{"src":"images/04.jpeg"},{"src":"images/05.jpeg"},{"src":"images/06.jpeg"}]'
     data-render-nav-inline=":false"
     role="region"
-    style="--carousel-nav-item-bg:rgba(255,255,255,.5);--carousel-nav-item-fill:#222;--carousel-nav-item-scale: 90%;--carousel-indicator-bg-active:orange;">
+    style="
+      --carousel-nav-item-bg:rgba(255,255,255,.5);
+      --carousel-nav-item-fill:#222;
+      --carousel-nav-item-scale: 90%;
+      --carousel-indicator-bg-active:orange;
+    ">
   </div>
 
+  <!-- Example with inline, correct markup -->
   <div 
-    aria-label="Timeline"
+    aria-label="Carousel with animated timeline"
     class="c-carousel c-carousel--timeline"
     data-autoplay=":true"
     data-autoplay-delay=":3000"
