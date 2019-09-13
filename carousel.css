@@ -26,6 +26,7 @@
 	--carousel-timeline-top: 4rem;
 	--carousel-timeline-item-w: 12%;
 
+	flex: 1;
 	margin-bottom: var(--carousel-margin-bot);
 	position: relative;
 }
@@ -101,7 +102,7 @@
 }
 /* Indicator Modifiers */
 .c-carousel--indicator-lines .c-carousel__indicator {
-	bottom: unset;
+	bottom: auto;
 	margin-top: var(--carousel-indicator-top);
 }
 .c-carousel--indicator-lines .c-carousel__indicator-wrapper {
@@ -192,7 +193,7 @@
 /* Navigation Modifiers */
 .c-carousel--nav-below .c-carousel__nav-next,
 .c-carousel--nav-below .c-carousel__nav-prev {
-	top: unset;
+	top: auto;
 	transform: none;
 }
 
@@ -354,9 +355,11 @@ CAROUSEL MODOFIERS
 	content: '';
 	display: block;
 }
-[class*="--ar-"] .c-carousel__item-image {
+[class*="--ar-"] .c-carousel__item-image,
+[class*="--ar-"] .c-carousel__item-content img {
 	height: 100%;
 	left: 0;
+	object-fit: cover;
 	position: absolute;
 	top: 0;
 	width: 100%;
@@ -381,6 +384,7 @@ CAROUSEL MODOFIERS
 [class*="--tar-"] .c-carousel__thumb-image {
 	height: 100%;
 	left: 0;
+	object-fit: cover;
 	position: absolute;
 	top: 0;
 	width: 100%;
