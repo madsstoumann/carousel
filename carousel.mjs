@@ -1,8 +1,8 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.37
- * @summary 13-09-2019
+ * @version 0.9.39
+ * @summary 17-09-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -25,6 +25,8 @@ export default class Carousel {
 				slides: [],
 				thumbnails: [],
 				touchDistance: 100,
+				videoThumbFallback: '',
+				videoThumbGenerate: false,
 
 				clsActive: 'c-carousel__item--active',
 				clsAnimate: 'c-carousel--animate',
@@ -43,12 +45,14 @@ export default class Carousel {
 				clsIndicatorButtonActive: 'c-carousel__indicator-btn--active',
 				clsIndicatorWrapper: 'c-carousel__indicator-wrapper',
 				clsLive: 'u-visually-hidden c-carousel__live',
+				clsLoading: 'c-carousel--loading',
 				clsNav: 'c-carousel__nav',
 				clsNavNext: 'c-carousel__nav-next',
 				clsNavPause: 'c-carousel__nav-pause',
 				clsNavPlay: 'c-carousel__nav-play',
 				clsNavPrev: 'c-carousel__nav-prev',
 				clsReverse: 'c-carousel--reverse',
+				clsSingleSlide: 'c-carousel--single',
 				clsThumbnailImage: 'c-carousel__thumb-image',
 				clsThumbnailInner: 'c-carousel__thumb-inner',
 				clsThumbnailItem: 'c-carousel__thumb-item',
@@ -294,6 +298,49 @@ export default class Carousel {
 		return index;
 	}
 
+	
+	/**
+	 * @function getVideoThumbnail
+	 * @description Gets / creates video-thumbnail
+	 * @param {Node} elm
+	 */
+	getVideoThumbnail(elm) {
+		const fallBack = {}; /* TODO: Fallback image */
+		const vimeoJSON = async (src) => await (await fetch(`//vimeo.com/api/oembed.json?url=${encodeURIComponent(src)}`)).json();
+		const extractFrame = (video) => {
+			const canvas = document.createElement('canvas');
+			return new Promise(resolve => {
+				video.onseeked = () => {
+					const ctx = canvas.getContext('2d');
+					/* TODO: maxWidth / height */
+					ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+					resolve(canvas.toDataURL());
+				};
+				video.currentTime = 0.1;
+			});
+		}
+
+		return new Promise(async resolve => {
+			if (elm.src.includes('mp4')) {
+				const video = document.createElement('video');
+				video.onloadedmetadata = () => {
+					extractFrame(video).then(response => {
+						resolve(response ? { src: response} : fallBack);
+					});
+				};
+				video.src = elm.src;
+			} 
+			else if (elm.src.includes('vimeo')) {
+				const json = await vimeoJSON(elm.src);
+				resolve(json ? { src: json.thumbnail_url } : fallBack);
+			}
+			else if (elm.src.includes('youtube')) {
+				const videoID = elm.src.match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();
+				resolve(videoID ? { src:`//img.youtube.com/vi/${videoID}/0.jpg`} : fallBack);
+			}
+		});
+	}
+
 	/**
 	 * @function gotoPage
 	 * @param {Boolean} [dirUp]
@@ -484,38 +531,58 @@ export default class Carousel {
 		this.wrapper.appendChild(this.live);
 
 		this.setSlides();
+
+		/* If only a single slide exists */
+		if (this.slides.length === 1) {
+			this.carousel.classList.add(this.settings.clsSingleSlide);
+		}
+
 		this.createNavigation();
 
 		/* Create thumbnails */
 		if (this.settings.renderThumbnails) {
-			this.thumbnails = this.settings.thumbnails.length
-				? this.settings.thumbnails
-				: this.slides.map(element =>
-						element.querySelector('img')
-					); /* TODO: Get thumbnail if markup contains <video> or <iframe> */
-					/* TODO: Fallback-image for video if no thumbnail */
-	
-			/* Create match-media-listeners for breakpoint-changes */
-			if (this.thumbnails.length) {
-				this.breakpoints = this.settings.breakpoints.map((breakpoint, index) => {
-						const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
-						return window.matchMedia(
-							`(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`
-						);
+			let promises = [];
+
+			if (this.settings.thumbnails.length) {
+				promises = this.settings.thumbnails;
+			}
+			else {
+				this.slides.map(element => {
+						const thumb = element.querySelector('iframe, img, video');
+						return thumb.tagName.toLowerCase() === 'img' ? promises.push(thumb) : promises.push(this.getVideoThumbnail(thumb));
 					}
 				);
-				this.breakpoints.forEach(breakpoint =>
-					breakpoint.addListener(this.updateItemsPerPage.bind(this))
-				);
-
-				this.createThumbnails();
-				this.updateItemsPerPage();
 			}
+
+			Promise.all(promises).then(results => {
+				this.thumbnails = results;
+				/* TODO: Fallback-image for video if no thumbnail */
+		
+				/* Create match-media-listeners for breakpoint-changes */
+				if (this.thumbnails.length) {
+					this.breakpoints = this.settings.breakpoints.map((breakpoint, index) => {
+							const min = index > 0 ? this.settings.breakpoints[index - 1] : 0;
+							return window.matchMedia(`(min-width: ${min}px) and (max-width: ${breakpoint - 1}px)`);
+						}
+					);
+					this.breakpoints.forEach(breakpoint =>
+						breakpoint.addListener(this.updateItemsPerPage.bind(this))
+					);
+
+					this.createThumbnails();
+					this.updateItemsPerPage();
+					this.gotoSlide(this.activeSlide, true, false);
+				}
+			});
+		}
+		else {
+			this.gotoSlide(this.activeSlide, true, false);
 		}
 
 		this.addAirplaySupport();
 		this.autoPlay(this.isPlaying);
-		this.gotoSlide(this.activeSlide, true, false);
+		this.wrapper.classList.remove(this.settings.clsLoading);
+		
 	}
 
 		/**
@@ -613,28 +680,16 @@ export default class Carousel {
 	this.slides = Array.from(this.carousel.children);
 		/* Add meta:position, add aria-hidden to non-active slides */
 		this.slides.forEach((slide, index) => {
+			const wrapper = slide.firstElementChild;
+			if (!wrapper.classList.contains(this.settings.clsItemContent)) {
+				wrapper.classList.add(this.settings.clsItemContent);
+			}
 			this.h('meta', { itemprop: 'position', content: index + 1 }, slide);
 			if (index !== this.activeSlide) {
 				slide.setAttribute('aria-hidden', true);
 			}
 		});
 		this.total = this.slides.length - 1;
-	}
-
-	/**
-	 * @function setVideoThumbnails
-	 * @description Creates array of thumbnails from slides-json, when init from url or json
-	 */
-	setVideoThumbnails(json) {
-		/* TODO: videoThumbnail should accept an object with alt: title etc. */
-		// const promises = json.map(item => {
-		// 	return item.type === 'video' && !item.thumbnail
-		// 		? videoThumbnail(item.src, item.title)
-		// 		: { src: item.thumbnail, alt: item.title };
-		// });
-		// Promise.all(promises).then(results => {
-		// 	this.settings.thumbnails = results;
-		// });
 	}
 
 	/**
