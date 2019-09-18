@@ -1,8 +1,8 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.39
- * @summary 17-09-2019
+ * @version 0.9.43
+ * @summary 18-09-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -15,7 +15,10 @@ export default class Carousel {
 				navNextSize: 16,
 				autoplay: false,
 				autoplayDelay: 3000,
+				autoplayCSSProp: '--carousel-delay',
 				breakpoints: [600, 1000, 1400, 1920, 3840],
+				eventSlideSet: '',
+				eventSlideChange: 'eventSlideChange',
 				renderIndicators: true,
 				renderNav: true,
 				renderNavInline: true,
@@ -25,7 +28,7 @@ export default class Carousel {
 				slides: [],
 				thumbnails: [],
 				touchDistance: 100,
-				videoThumbFallback: '',
+				videoThumbFallback: '/images/06.jpeg',
 				videoThumbGenerate: false,
 
 				clsActive: 'c-carousel__item--active',
@@ -304,9 +307,18 @@ export default class Carousel {
 	 * @description Gets / creates video-thumbnail
 	 * @param {Node} elm
 	 */
-	getVideoThumbnail(elm) {
-		const fallBack = {}; /* TODO: Fallback image */
-		const vimeoJSON = async (src) => await (await fetch(`//vimeo.com/api/oembed.json?url=${encodeURIComponent(src)}`)).json();
+	getVideoThumbnail(elm, fallBack) {
+		const vimeoJSON = async (src) => {
+			try {
+				const data = await (await fetch(`//vimeo.com/api/oembed.json?url=${encodeURIComponent(src)}`, {
+					mode: 'cors'
+				})).json();
+				return data;
+			}
+			catch(err) {
+				return fallBack;
+			}
+		}
 		const extractFrame = (video) => {
 			const canvas = document.createElement('canvas');
 			return new Promise(resolve => {
@@ -325,7 +337,7 @@ export default class Carousel {
 				const video = document.createElement('video');
 				video.onloadedmetadata = () => {
 					extractFrame(video).then(response => {
-						resolve(response ? { src: response} : fallBack);
+						resolve(response ? { src: response } : fallBack);
 					});
 				};
 				video.src = elm.src;
@@ -395,6 +407,8 @@ export default class Carousel {
 			this.setActiveThumbnail();
 			this.gotoPage();
 		}
+
+		this.wrapper.dispatchEvent(new CustomEvent(this.settings.eventSlideChange, { detail: slideIndex }));
 	}
 
 	/**
@@ -549,15 +563,13 @@ export default class Carousel {
 			else {
 				this.slides.map(element => {
 						const thumb = element.querySelector('iframe, img, video');
-						return thumb.tagName.toLowerCase() === 'img' ? promises.push(thumb) : promises.push(this.getVideoThumbnail(thumb));
+						return thumb.tagName.toLowerCase() === 'img' ? promises.push(thumb) : promises.push(this.getVideoThumbnail(thumb, { src: this.settings.videoThumbFallback }));
 					}
 				);
 			}
 
 			Promise.all(promises).then(results => {
 				this.thumbnails = results;
-				/* TODO: Fallback-image for video if no thumbnail */
-		
 				/* Create match-media-listeners for breakpoint-changes */
 				if (this.thumbnails.length) {
 					this.breakpoints = this.settings.breakpoints.map((breakpoint, index) => {
@@ -580,9 +592,17 @@ export default class Carousel {
 		}
 
 		this.addAirplaySupport();
-		this.autoPlay(this.isPlaying);
+
+		/* Remove loading class */
 		this.wrapper.classList.remove(this.settings.clsLoading);
-		
+
+		document.documentElement.style.setProperty(this.settings.autoplayCSSProp, `${this.settings.autoplayDelay}ms`);
+		this.autoPlay(this.isPlaying);
+
+		/* Handle external event */
+		if (this.settings.eventSlideSet) {
+			this.wrapper.addEventListener(this.settings.eventSlideSet, (event) => this.gotoSlide(event.detail));
+		}
 	}
 
 		/**

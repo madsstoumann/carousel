@@ -1,4 +1,4 @@
-.c-carousel {
+:root {
 	--carousel-margin-bot: 2rem;
 	--carousel-indicator-bg: #d8d8d8;
 	--carousel-indicator-bg-active: cornflowerblue;
@@ -25,7 +25,8 @@
 	--carousel-timeline-item-sz: 16px;
 	--carousel-timeline-top: 4rem;
 	--carousel-timeline-item-w: 12%;
-
+}
+.c-carousel {
 	flex: 1;
 	margin-bottom: var(--carousel-margin-bot);
 	position: relative;
