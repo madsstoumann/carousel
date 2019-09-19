@@ -1,8 +1,8 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.43
- * @summary 18-09-2019
+ * @version 0.9.44
+ * @summary 19-09-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -17,8 +17,9 @@ export default class Carousel {
 				autoplayDelay: 3000,
 				autoplayCSSProp: '--carousel-delay',
 				breakpoints: [600, 1000, 1400, 1920, 3840],
+				enablePopup: false,
 				eventSlideSet: '',
-				eventSlideChange: 'eventSlideChange',
+				eventSlideChange: '',
 				renderIndicators: true,
 				renderNav: true,
 				renderNavInline: true,
@@ -29,7 +30,6 @@ export default class Carousel {
 				thumbnails: [],
 				touchDistance: 100,
 				videoThumbFallback: '/images/06.jpeg',
-				videoThumbGenerate: false,
 
 				clsActive: 'c-carousel__item--active',
 				clsAnimate: 'c-carousel--animate',
@@ -53,7 +53,10 @@ export default class Carousel {
 				clsNavNext: 'c-carousel__nav-next',
 				clsNavPause: 'c-carousel__nav-pause',
 				clsNavPlay: 'c-carousel__nav-play',
+				clsNavPopup: 'c-carousel__nav-popup',
+				clsNavPopupClose: 'c-carousel__nav-popup--close',
 				clsNavPrev: 'c-carousel__nav-prev',
+				clsPopup: 'c-carousel--popup',
 				clsReverse: 'c-carousel--reverse',
 				clsSingleSlide: 'c-carousel--single',
 				clsThumbnailImage: 'c-carousel__thumb-image',
@@ -68,6 +71,7 @@ export default class Carousel {
 
 				labelNext: 'Next',
 				labelPlay: 'Play/Pause',
+				labelPopup: 'Open full-screen',
 				labelPrev: 'Previous'
 			},
 			this.stringToType(settings)
@@ -78,7 +82,7 @@ export default class Carousel {
 	/**
 	 * @function addAirplaySupport
 	 * @description Adds support for Apple airplay for videos
-	 * TODO! Work-in-progress
+	 * TODO Work-in-progress
 	 */
 	addAirplaySupport() {
 		//<button data-js="airPlayButton" hidden disabled>AirPlay</button>
@@ -149,13 +153,10 @@ export default class Carousel {
 	 */
 	createNavigation() {
 		/* Create navigation: next, prev, play/pause */
-		if (this.settings.renderNav) {
+		if (this.settings.renderNav && this.slides.length > 1) {
 			const previous = this.h('button', { class: this.settings.clsNavPrev, 'aria-label': this.settings.labelPrev, rel: 'next' });
 			previous.insertAdjacentHTML('afterbegin', this.navArrow(true));
 			previous.addEventListener('click', () => this.navSlide(false));
-
-			this.play = this.h('button', { class: this.settings.clsNavPlay, 'aria-label': this.settings.labelPlay });
-			this.play.addEventListener('click', () => this.autoPlay(!this.isPlaying));
 
 			const next = this.h('button', {	class: this.settings.clsNavNext, 'aria-label': this.settings.labelNext, rel: 'prev' });
 			next.insertAdjacentHTML('afterbegin', this.navArrow(false));
@@ -178,7 +179,7 @@ export default class Carousel {
 		}
 
 		/* Create indicators */
-		if (this.settings.renderIndicators) {
+		if (this.settings.renderIndicators && this.slides.length > 1) {
 			this.indicators = this.h('nav', { class: this.settings.clsIndicator, itemscope: 'itemscope', itemtype: 'http://schema.org/SiteNavigationElement'});
 			this.indicators.innerHTML = this.slides.map((item, index) =>
 			`<div class="${this.settings.clsIndicatorItem}">
@@ -197,6 +198,20 @@ export default class Carousel {
 			});
 			this.indicatorsWrapper.appendChild(this.indicators);
 			this.wrapper.appendChild(this.indicatorsWrapper);
+		}
+
+		/* Add play/pasue button if autoPlay is enabled */
+		if (this.settings.autoplay) {
+			this.play = this.h('button', { class: this.settings.clsNavPlay, 'aria-label': this.settings.labelPlay });
+			this.play.addEventListener('click', () => this.autoPlay(!this.isPlaying));
+			this.inner.appendChild(this.play);
+		}
+
+		/* Add support for popup, if enabled */
+		if (this.settings.enablePopup) {
+			this.popup = this.h('button', { class: this.settings.clsNavPopup, 'aria-label': this.settings.labelPopup });
+			this.popup.addEventListener('click', () => { this.wrapper.classList.toggle(this.settings.clsPopup); this.popup.classList.toggle(this.settings.clsNavPopupClose); });
+			this.inner.appendChild(this.popup);
 		}
 	}
 
@@ -255,11 +270,11 @@ export default class Carousel {
 		const thumbnailWrapper = this.h('nav', { class: this.settings.clsThumbnailWrapper	});
 
 		thumbnailOuter.appendChild(this.thumbnailInner);
-		if (this.settings.renderThumbnailsNav) {
+		if (this.settings.renderThumbnailsNav && this.slides.length > 1) {
 			thumbnailWrapper.appendChild(this.thumbnailPrev);
 		}
 		thumbnailWrapper.appendChild(thumbnailOuter);
-		if (this.settings.renderThumbnailsNav) {
+		if (this.settings.renderThumbnailsNav && this.slides.length > 1) {
 			thumbnailWrapper.appendChild(this.thumbnailNext);
 		}
 		this.wrapper.appendChild(thumbnailWrapper);
@@ -306,6 +321,7 @@ export default class Carousel {
 	 * @function getVideoThumbnail
 	 * @description Gets / creates video-thumbnail
 	 * @param {Node} elm
+	 * FIXME Safari-issues, error-handling
 	 */
 	getVideoThumbnail(elm, fallBack) {
 		const vimeoJSON = async (src) => {
@@ -324,7 +340,6 @@ export default class Carousel {
 			return new Promise(resolve => {
 				video.onseeked = () => {
 					const ctx = canvas.getContext('2d');
-					/* TODO: maxWidth / height */
 					ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 					resolve(canvas.toDataURL());
 				};
@@ -374,6 +389,8 @@ export default class Carousel {
 	 * @description Go to specific slide
 	 */
 	gotoSlide(slideIndex = -1, dirUp, animate = true) {
+		if (!this.slides[slideIndex]) { return; }
+
 		/* Determine slide-direction */
 		this.carousel.classList.toggle(
 			this.settings.clsReverse, !dirUp
@@ -408,7 +425,9 @@ export default class Carousel {
 			this.gotoPage();
 		}
 
-		this.wrapper.dispatchEvent(new CustomEvent(this.settings.eventSlideChange, { detail: slideIndex }));
+		if (this.settings.eventSlideChange) {
+			this.wrapper.dispatchEvent(new CustomEvent(this.settings.eventSlideChange, { detail: { index: slideIndex, dir: dirUp } }));
+		}
 	}
 
 	/**
@@ -553,7 +572,7 @@ export default class Carousel {
 
 		this.createNavigation();
 
-		/* Create thumbnails */
+		/* Create thumbnails, fetch video-frames as thumbnails */
 		if (this.settings.renderThumbnails) {
 			let promises = [];
 
@@ -591,18 +610,22 @@ export default class Carousel {
 			this.gotoSlide(this.activeSlide, true, false);
 		}
 
+		/* Handle external slideSet-event */
+		if (this.settings.eventSlideSet) {
+			this.wrapper.addEventListener(this.settings.eventSlideSet, (event) => this.gotoSlide(event.detail.index, event.detail.dir));
+		}
+
+		/* Update CSS Custom Property with Animation Timing */
+		document.documentElement.style.setProperty(this.settings.autoplayCSSProp, `${this.settings.autoplayDelay}ms`);
+
+		/* Enable Apple AirPlay for <video> */
 		this.addAirplaySupport();
 
 		/* Remove loading class */
 		this.wrapper.classList.remove(this.settings.clsLoading);
 
-		document.documentElement.style.setProperty(this.settings.autoplayCSSProp, `${this.settings.autoplayDelay}ms`);
+		/* Run Autoplay */
 		this.autoPlay(this.isPlaying);
-
-		/* Handle external event */
-		if (this.settings.eventSlideSet) {
-			this.wrapper.addEventListener(this.settings.eventSlideSet, (event) => this.gotoSlide(event.detail));
-		}
 	}
 
 		/**

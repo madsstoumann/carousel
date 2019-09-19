@@ -9,11 +9,12 @@
 <body>
 
   <div
-    id="carousel1"
+    data-event-slide-change="eventSlideChange"
     aria-label="Description of carousel content"
     data-js="carousel"
     data-autoplay=":false"
     data-autoplay-delay=":3000"
+    data-enable-popup=":true"
     data-label-next="Next"
     data-label-play="Play/Pause"
     data-label-prev="Previous"
@@ -23,9 +24,9 @@
     data-render-thumbnails=":true"
     data-render-thumbnails-nav=":true"
     class="c-carousel c-carousel--ar-3-2 c-carousel--tar-1-1 c-carousel--loading">
-    <!-- <div class="c-carousel__item-content"><iframe src="https://www.youtube.com/embed/9m_K2Yg7wGQ" frameborder="0" tabindex="-1" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+    <div class="c-carousel__item-content"><iframe src="https://www.youtube.com/embed/9m_K2Yg7wGQ" frameborder="0" tabindex="-1" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
     <div class="c-carousel__item-content"><iframe src="https://player.vimeo.com/video/169982685" frameborder="0" tabindex="-1" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
-    <div class="c-carousel__item-content"><video controls itemprop="video" src="/video/video.mp4"></video></div> -->
+    <div class="c-carousel__item-content"><video controls itemprop="video" src="/video/video.mp4"></video></div>
     <div class="c-carousel__item-content"><img src="images/01.jpeg" /></div>
     <div class="c-carousel__item-content"><img src="images/02.jpeg" /></div>
     <div class="c-carousel__item-content"><img src="images/03.jpeg" /></div>
@@ -36,7 +37,6 @@
 
   <!-- Examples with data from `data-slides`-attribute -->
   <div 
-    id="carousel2"
     data-event-slide-set="eventSlideSet"
     aria-label="Carousel with navigation below"
     class="c-carousel c-carousel--indicator-lines c-carousel--nav-below c-carousel--ar-3-2"
@@ -85,7 +85,7 @@
     aria-label="Carousel with animated timeline"
     class="c-carousel c-carousel--timeline"
     data-autoplay=":true"
-    data-autoplay-delay=":3000"
+    data-autoplay-delay=":5000"
     data-js="carousel"
     data-render-nav=":false"
     role="region">
@@ -157,12 +157,24 @@
       })
     }
 
-  const carousel1 = document.getElementById('carousel1');
-  const carousel2 = document.getElementById('carousel2');
-  carousel1.addEventListener('eventSlideChange', (event) => {
-    const index = event.detail - 0;
-    carousel2.dispatchEvent(new CustomEvent('eventSlideSet', { detail: index }));
-  });
+    function linkCarousels(scope) {
+      const carousel1 = scope.querySelector('[data-event-slide-change]');
+      const carousel2 = scope.querySelector('[data-event-slide-set]');
+      if (carousel1 && carousel2) {
+        const eventChange = carousel1.dataset.eventSlideChange;
+        const eventSet = carousel2.dataset.eventSlideSet;
+        if (eventChange && eventSet) {
+          carousel1.addEventListener(eventChange, (event) => {
+            const index = event.detail.index - 0;
+            const dir = event.detail.dir;
+            carousel2.dispatchEvent(new CustomEvent(eventSet, { detail: { index, dir } }));
+          });
+        }
+      }
+    }
+
+    linkCarousels(document);
+
   </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 :root {
+	--carousel-delay: 1500ms;
 	--carousel-margin-bot: 2rem;
 	--carousel-indicator-bg: #d8d8d8;
 	--carousel-indicator-bg-active: cornflowerblue;
@@ -11,6 +12,7 @@
 	--carousel-nav-item-fill: #00a3ff;
 	--carousel-nav-item-scale: 60%;
 	--carousel-nav-item-w: 5em;
+	--carousel-popup-zindex: 999;
 	--carousel-thumbnail-active: tomato;
 	--carousel-thumbnail-bdw: 2px;
 	--carousel-thumbnail-gutter: 1rem;
@@ -50,6 +52,27 @@
 .c-carousel--loading::before {
 	content: '';
 	display: block;
+}
+.c-carousel--popup {
+	bottom: 0;
+	height: 100%;
+	left: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+	width: 100vw;
+	z-index: var(--carousel-popup-zindex);
+}
+.c-carousel--popup::before {
+	background-color: #FFF;
+	bottom: 0;
+	content: "";
+	height: 100%;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 100%;
 }
 .c-carousel__item {
 	flex: 1 0 100%;
@@ -138,6 +161,7 @@
 .c-carousel__nav-airplay,
 .c-carousel__nav-next,
 .c-carousel__nav-play,
+.c-carousel__nav-popup,
 .c-carousel__nav-prev {
 	background-color: transparent;
 	background-position: 50%;
@@ -171,6 +195,20 @@
 	left: 50%;
 	opacity: 0;
 	transform: translate(-50%, -50%);
+}
+.c-carousel__nav-popup {
+	background-color: rgba(255, 255, 255, 0.6);
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 0v6.5l-2.5-2.5-3 3-1.5-1.5 3-3-2.5-2.5zM7 10.5l-3 3 2.5 2.5h-6.5v-6.5l2.5 2.5 3-3z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
+	background-position: 100% 100%;
+	border-radius: 50%;
+	right: 1rem;
+	top: 1rem;
+	transform: translateY(0);
+}
+.c-carousel__nav-popup--close {
+	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4 L20 20 M4 20 L20 4z' stroke-width='1' stroke='%23555'%3E%3C/path%3E%3C/svg%3E");
+	background-position: 50% 50%;
+	right: 2rem;
 }
 .c-carousel__nav-pause {
 	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2h5v12h-5zM9 2h5v12h-5z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
@@ -207,9 +245,7 @@
 	fill: var(--carousel-thumbnav-item-fill);
 	left: 0;
 }
-.c-carousel__nav--zoom {
-	display: none;
-}
+
 /* Navigation Modifiers */
 .c-carousel--nav-below .c-carousel__nav-next,
 .c-carousel--nav-below .c-carousel__nav-prev {
@@ -325,6 +361,18 @@ CAROUSEL MODOFIERS
 	display: flex;
 	flex: 1 0 var(--carousel-timeline-item-w);
 	justify-content: center;
+	position: relative;
+}
+.c-carousel--timeline .c-carousel__indicator-item::after {
+	content: '';
+	border-top: 2px solid var(--carousel-timeline-bdc);
+	width: 100%;
+	height: 2px;
+	position: absolute;
+	transform: scaleX(0) translateX(50%);
+}
+.c-carousel--timeline .c-carousel__indicator-item:last-of-type::after {
+	width: 50%;
 }
 .c-carousel--timeline .c-carousel__indicator-btn {
 	--carousel-indicator-height: var(--carousel-timeline-item-sz);
@@ -336,6 +384,7 @@ CAROUSEL MODOFIERS
 	position: relative;
 	top: calc(0px - (var(--carousel-timeline-item-sz) / 2));
 	transition: transform .3s, -webkit-transform .3s;
+	z-index: 1;
 }
 .c-carousel--timeline .c-carousel__indicator-btn::after {
 	background-color: var(--carousel-timeline-item-cl);
@@ -365,6 +414,12 @@ CAROUSEL MODOFIERS
 }
 .c-carousel--timeline .c-carousel__indicator-wrapper {
 	margin-top: var(--carousel-timeline-top);
+}
+.c-carousel--timeline .c-carousel__indicator-btn--active::after {
+	animation: drawLine var(--carousel-delay) ease-in;
+}
+.c-carousel--timeline .c-carousel__indicator-item:last-of-type.c-carousel__indicator-btn--active::after  {
+	animation-duration: calc(var(--carousel-delay) / 2);
 }
 
 /* Aspect Ratios */
@@ -432,3 +487,14 @@ CAROUSEL MODOFIERS
 .c-carousel--tar-275-1 .c-carousel__thumb-item::before { padding-bottom: 36.36%; }
 .c-carousel--tar-3-2 .c-carousel__thumb-item::before { padding-bottom: 33.333333%; }
 .c-carousel--tar-4-1 .c-carousel__thumb-item::before { padding-bottom: 25%; }
+
+/* Animations */
+@keyframes drawLine {
+  from {
+    transform: scaleX(0) translateX(50%);
+  }
+
+  to {
+    transform: scaleX(1) translateX(50%);
+  }
+}
