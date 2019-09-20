@@ -375,6 +375,17 @@ CAROUSEL MODOFIERS
 	position: absolute;
 	transform: scaleX(0) translateX(50%);
 }
+.c-carousel--timeline .c-carousel__indicator-item:first-of-type::before {
+	animation-delay: calc(var(--carousel-delay) / 2);
+	animation-duration: calc(var(--carousel-delay) / 2);
+	content: '';
+	border-top: 2px solid var(--carousel-timeline-bdc);
+	width: 50%;
+	height: 2px;
+	position: absolute;
+	transform-origin: -50% 0;
+	transform: scaleX(0) translateX(-50%);
+}
 .c-carousel--timeline .c-carousel__indicator-item:last-of-type::after {
 	width: 50%;
 }
@@ -424,6 +435,10 @@ CAROUSEL MODOFIERS
 }
 .c-carousel--timeline .c-carousel__indicator-item:last-of-type.c-carousel__indicator-btn--active::after  {
 	animation-duration: calc(var(--carousel-delay) / 2);
+}
+.c-carousel--timeline .c-carousel__indicator-item--first::before {
+	
+	animation: drawPreLine var(--carousel-delay) ease-in;
 }
 
 /* Aspect Ratios */
@@ -500,5 +515,14 @@ CAROUSEL MODOFIERS
 
   to {
     transform: scaleX(1) translateX(50%);
+  }
+}
+@keyframes drawPreLine {
+  from {
+    transform: scaleX(0) translateX(-50%);
+  }
+
+  to {
+    transform: scaleX(1) translateX(-50%);
   }
 }

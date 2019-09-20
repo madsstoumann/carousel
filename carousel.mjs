@@ -44,6 +44,7 @@ export default class Carousel {
 				clsItemText: 'c-carousel__item-text',
 				clsItemVideo: 'c-carousel__item-video',
 				clsIndicator: 'c-carousel__indicator',
+				clsIndicatorFirst: 'c-carousel__indicator-item--first',
 				clsIndicatorItem: 'c-carousel__indicator-item',
 				clsIndicatorButton: 'c-carousel__indicator-btn',
 				clsIndicatorButtonActive: 'c-carousel__indicator-btn--active',
@@ -669,6 +670,7 @@ export default class Carousel {
 		this.indicators.children[this.activeSlide].classList.add(
 			this.settings.clsIndicatorButtonActive
 		);
+		this.indicators.children[0].classList.toggle(this.settings.clsIndicatorFirst, this.activeSlide === this.slides.length -1)
 	}
 
 	/**
