@@ -1,8 +1,8 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.44
- * @summary 19-09-2019
+ * @version 0.9.45
+ * @summary 20-09-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
@@ -11,7 +11,7 @@ export default class Carousel {
 		this.settings = Object.assign(
 			{
 				animateTimeout: 33,
-				navNext: 'M9.707 13.707l5-5c0.391-0.39 0.391-1.024 0-1.414l-5-5c-0.391-0.391-1.024-0.391-1.414 0s-0.391 1.024 0 1.414l3.293 3.293h-9.586c-0.552 0-1 0.448-1 1s0.448 1 1 1h9.586l-3.293 3.293c-0.195 0.195-0.293 0.451-0.293 0.707s0.098 0.512 0.293 0.707c0.391 0.391 1.024 0.391 1.414 0z',
+				navNext: 'M5.5 0l-1 1 7 7-7 7 1 1 8-8-8-8z',
 				navNextSize: 16,
 				autoplay: false,
 				autoplayDelay: 3000,
@@ -32,6 +32,7 @@ export default class Carousel {
 				videoThumbFallback: '/images/06.jpeg',
 
 				clsActive: 'c-carousel__item--active',
+				clsAirplay: 'c-carousel__nav-airplay',
 				clsAnimate: 'c-carousel--animate',
 				clsCarousel: 'c-carousel__list',
 				clsInner: 'c-carousel__inner',
@@ -82,18 +83,14 @@ export default class Carousel {
 	/**
 	 * @function addAirplaySupport
 	 * @description Adds support for Apple airplay for videos
-	 * TODO Work-in-progress
 	 */
 	addAirplaySupport() {
-		//<button data-js="airPlayButton" hidden disabled>AirPlay</button>
 		if (window.WebKitPlaybackTargetAvailabilityEvent) {
 			const videos = this.wrapper.querySelectorAll('video');
 			videos.forEach(video => {
 				const button = document.createElement('button');
-				button.classList.add('c-carousel__nav--airplay');
+				button.classList.add(this.settings.clsAirplay);
 				video.parentNode.insertBefore(button, video.nextSibling);
-				// eslint-disable-next-line
-				console.log(button);
 				video.addEventListener(
 					'webkitplaybacktargetavailabilitychanged',
 					function(event) {
@@ -103,19 +100,12 @@ export default class Carousel {
 								button.disabled = false;
 								break;
 							case 'not-available':
-								//button.hidden = true;
-								//button.disabled = true;
+								button.hidden = true;
+								button.disabled = true;
 								break;
 							default:
 								break;
 						}
-					}
-				);
-				video.addEventListener(
-					'webkitcurrentplaybacktargetiswirelesschanged',
-					function() {
-						//updateAirPlayButtonWirelessStyle();
-						//updatePageDimmerForWirelessPlayback();
 					}
 				);
 				if (window.WebKitPlaybackTargetAvailabilityEvent) {
@@ -321,15 +311,12 @@ export default class Carousel {
 	 * @function getVideoThumbnail
 	 * @description Gets / creates video-thumbnail
 	 * @param {Node} elm
-	 * FIXME Safari-issues, error-handling
 	 */
 	getVideoThumbnail(elm, fallBack) {
 		const vimeoJSON = async (src) => {
 			try {
-				const data = await (await fetch(`//vimeo.com/api/oembed.json?url=${encodeURIComponent(src)}`, {
-					mode: 'cors'
-				})).json();
-				return data;
+				const data = await (await fetch(`//vimeo.com/api/oembed.json?url=${encodeURIComponent(src)}`)).json();
+				return { src: data.thumbnail_url };
 			}
 			catch(err) {
 				return fallBack;
@@ -359,7 +346,7 @@ export default class Carousel {
 			} 
 			else if (elm.src.includes('vimeo')) {
 				const json = await vimeoJSON(elm.src);
-				resolve(json ? { src: json.thumbnail_url } : fallBack);
+				resolve(json);
 			}
 			else if (elm.src.includes('youtube')) {
 				const videoID = elm.src.match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();

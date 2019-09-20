@@ -1,5 +1,6 @@
 :root {
 	--carousel-delay: 1500ms;
+	--carousel-inner-gutter: 1rem;
 	--carousel-margin-bot: 2rem;
 	--carousel-indicator-bg: #d8d8d8;
 	--carousel-indicator-bg-active: cornflowerblue;
@@ -175,9 +176,13 @@
 	width: var(--carousel-nav-item-w);
 }
 .c-carousel__nav-airplay {
+	background-color: rgba(255, 255, 255, 0.6);
 	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 3c1.078 0 2.016 0.938 2.016 2.016v12c0 1.078-0.938 1.969-2.016 1.969h-3.984v-1.969h3.984v-12h-18v12h3.984v1.969h-3.984c-1.078 0-2.016-0.891-2.016-1.969v-12c0-1.078 0.938-2.016 2.016-2.016h18zM6 21.984l6-6 6 6h-12z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
-	right: 0;
-	top: 0;
+	background-size: 60%;
+	border-radius: 50%;
+	bottom: var(--carousel-inner-gutter);
+	right: var(--carousel-inner-gutter);
+	top: auto;
 	transform: translateY(0);
 }
 .c-carousel__nav-next {
@@ -201,14 +206,13 @@
 	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 0v6.5l-2.5-2.5-3 3-1.5-1.5 3-3-2.5-2.5zM7 10.5l-3 3 2.5 2.5h-6.5v-6.5l2.5 2.5 3-3z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
 	background-position: 100% 100%;
 	border-radius: 50%;
-	right: 1rem;
-	top: 1rem;
+	right: var(--carousel-inner-gutter);
+	top: var(--carousel-inner-gutter);
 	transform: translateY(0);
 }
 .c-carousel__nav-popup--close {
 	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4 L20 20 M4 20 L20 4z' stroke-width='1' stroke='%23555'%3E%3C/path%3E%3C/svg%3E");
 	background-position: 50% 50%;
-	right: 2rem;
 }
 .c-carousel__nav-pause {
 	background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2h5v12h-5zM9 2h5v12h-5z' fill='%23555'%3E%3C/path%3E%3C/svg%3E");
