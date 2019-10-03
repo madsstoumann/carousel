@@ -220,7 +220,7 @@ export default class Carousel {
 				`<video class="${this.settings.clsItemVideo}" tabindex="-1" controls ${slide.thumbnail ? `poster="${slide.thumbnail}"` : ''} preload="metadata"><source src="${slide.src}" type="video/${slide.videoType || 'mp4'}"></source></video>` :
 				`<iframe src="${slide.src}" class="${this.settings.clsItemVideo}" frameborder="0" tabindex="-1" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
 				}`:
-				`<img src="${slide.src}" alt="${slide.title}" class="${this.settings.clsItemImage}" loading="${index === 0 ? 'eager' : 'lazy'}" />`
+				`<img src="${slide.src}" alt="${slide.title}" class="${this.settings.clsItemImage}" loading="${index === 0 ? 'eager' : 'lazy'}" data-object-fit />`
 			}
 			${this.settings.clsItemHeading ? `<span class="${this.settings.clsItemHeading}" itemprop="name">${slide.title}</span>` : ''}
 			${this.settings.clsItemText ? `<figcaption class="${this.settings.clsItemText}" itemprop="description">${slide.description}</figcaption>` : ''}
