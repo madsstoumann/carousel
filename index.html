@@ -9,7 +9,7 @@
 <body>
 
   <div
-    data-event-slide-change="eventSlideChange"
+    data-event-slide-change="linkCarousels"
     aria-label="Description of carousel content"
     data-js="carousel"
     data-autoplay=":false"
@@ -37,7 +37,7 @@
 
   <!-- Examples with data from `data-slides`-attribute -->
   <div 
-    data-event-slide-set="eventSlideSet"
+    data-event-slide-set="linkCarousels"
     aria-label="Carousel with navigation below"
     class="c-carousel c-carousel--indicator-lines c-carousel--nav-below c-carousel--ar-3-2"
     data-js="carousel"
@@ -87,7 +87,7 @@
     data-autoplay=":true"
     data-autoplay-delay=":5000"
     data-js="carousel"
-    data-render-nav=":false"
+    data-render-nav=":true"
     role="region">
 
     <nav class="c-carousel__inner">
@@ -150,30 +150,30 @@
     if (elements.length) {
       import('/carousel.mjs')
       .then(module => {
-        const jsClass = module.default;
+        const jsClass = module.Carousel;
         elements.forEach(element => {
           new jsClass(element, element.dataset);
         });
       })
     }
 
-    function linkCarousels(scope) {
-      const carousel1 = scope.querySelector('[data-event-slide-change]');
-      const carousel2 = scope.querySelector('[data-event-slide-set]');
-      if (carousel1 && carousel2) {
-        const eventChange = carousel1.dataset.eventSlideChange;
-        const eventSet = carousel2.dataset.eventSlideSet;
-        if (eventChange && eventSet) {
-          carousel1.addEventListener(eventChange, (event) => {
-            const index = event.detail.index - 0;
-            const dir = event.detail.dir;
-            carousel2.dispatchEvent(new CustomEvent(eventSet, { detail: { index, dir } }));
-          });
-        }
-      }
-    }
+    // function linkCarousels(scope) {
+    //   const carousel1 = scope.querySelector('[data-event-slide-change]');
+    //   const carousel2 = scope.querySelector('[data-event-slide-set]');
+    //   if (carousel1 && carousel2) {
+    //     const eventChange = carousel1.dataset.eventSlideChange;
+    //     const eventSet = carousel2.dataset.eventSlideSet;
+    //     if (eventChange && eventSet) {
+    //       carousel1.addEventListener(eventChange, (event) => {
+    //         const index = event.detail.index - 0;
+    //         const dir = event.detail.dir;
+    //         carousel2.dispatchEvent(new CustomEvent(eventSet, { detail: { index, dir } }));
+    //       });
+    //     }
+    //   }
+    // }
 
-    linkCarousels(document);
+    // linkCarousels(document);
 
   </script>
 </body>

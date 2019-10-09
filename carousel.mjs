@@ -1,12 +1,12 @@
 /**
  * Carousel module.
  * @module carousel.mjs
- * @version 0.9.45
- * @summary 20-09-2019
+ * @version 0.9.48
+ * @summary 09-10-2019
  * @author Mads Stoumann
  * @description Carousel-control
  */
-export default class Carousel {
+export class Carousel {
 	constructor(wrapper, settings) {
 		this.settings = Object.assign(
 			{
@@ -26,6 +26,7 @@ export default class Carousel {
 				renderThumbnails: false,
 				renderThumbnailsNav: true,
 				pageItems: [2, 3, 4, 6, 8],
+				slideDir: '',
 				slides: [],
 				thumbnails: [],
 				touchDistance: 100,
@@ -152,10 +153,6 @@ export default class Carousel {
 			const next = this.h('button', {	class: this.settings.clsNavNext, 'aria-label': this.settings.labelNext, rel: 'prev' });
 			next.insertAdjacentHTML('afterbegin', this.navArrow(false));
 			next.addEventListener('click', () => this.navSlide(true));
-
-			if (this.settings.autoplay) {
-				this.inner.appendChild(this.play);
-			}
 
 			if (this.settings.renderNavInline) {
 				this.inner.appendChild(previous);
@@ -380,8 +377,9 @@ export default class Carousel {
 		if (!this.slides[slideIndex]) { return; }
 
 		/* Determine slide-direction */
+		const slideDir = this.settings.slideDir !== '' ? this.settings.slideDir : dirUp;
 		this.carousel.classList.toggle(
-			this.settings.clsReverse, !dirUp
+			this.settings.clsReverse, !slideDir
 		);
 		this.previousSlide = this.activeSlide;
 
@@ -614,9 +612,33 @@ export default class Carousel {
 
 		/* Run Autoplay */
 		this.autoPlay(this.isPlaying);
+
+		/* Link multiple carousels */
+		this.linkCarousels(document);
 	}
 
-		/**
+	/**
+	 * @function linkCarousels
+	 * @param {Node} scope
+	 * @description Links two carousels
+	 */
+	linkCarousels(scope) {
+		const masterId = this.settings.eventSlideChange;
+		if (!masterId) {
+			return;
+		}
+		/* Look for elements where "data-event-slide-set" matches masterId */
+		const slaves = [...scope.querySelectorAll(`[data-event-slide-set='${masterId}']`)];
+		this.wrapper.addEventListener(masterId, (event) => {
+			const index = event.detail.index - 0;
+			const dir = event.detail.dir;
+			slaves.forEach((slave) => {
+				slave.dispatchEvent(new CustomEvent(masterId, { detail: { index, dir } }));
+			});
+		});
+	}
+
+	/**
 	 * @function navArrow
 	 * @param {Boolean} [reverse] Flip
 	 * @description returns a right (or left) navigation arrow
